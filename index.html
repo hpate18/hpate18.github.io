@@ -404,6 +404,118 @@ async function checkSession() {
 
 loadSite();
 checkSession();
+
+// WEBSITE APPEARANCE EDITOR
+
+let backgroundImageData = "";
+
+function openAppearance() {
+  if (!isOwner) {
+    alert("Only the website owner can change appearances.");
+    return;
+  }
+  document.getElementById("appearance-panel").style.display = "block";
+}
+
+function closeAppearance() {
+  document.getElementById("appearance-panel").style.display = "none";
+}
+
+function setTheme(theme) {
+  document.body.classList.toggle("dark-mode", theme === "dark");
+
+  if (theme === "dark") {
+    document.documentElement.style.setProperty("--site-bg", "#101820");
+    document.documentElement.style.setProperty("--site-text", "#f5f3ed");
+    document.documentElement.style.setProperty("--site-surface", "#202c38");
+  } else {
+    document.documentElement.style.setProperty("--site-bg", "#f5f3ed");
+    document.documentElement.style.setProperty("--site-text", "#101d2b");
+    document.documentElement.style.setProperty("--site-surface", "#ffffff");
+  }
+}
+
+function changeColour(variable, colour) {
+  document.documentElement.style.setProperty(variable, colour);
+}
+
+function setBrightness(value) {
+  document.body.style.filter = "brightness(" + value / 100 + ")";
+}
+
+async function uploadBackground(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("Please choose an image smaller than 5 MB.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    backgroundImageData = e.target.result;
+
+    document.documentElement.style.setProperty(
+      "--background-image",
+      "url('" + backgroundImageData + "')"
+    );
+
+    document.body.classList.add("custom-background");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+async function saveAppearance() {
+  if (!isOwner) return;
+
+  const settings = {
+    theme: document.body.classList.contains("dark-mode") ? "dark" : "light",
+    bg: getComputedStyle(document.documentElement).getPropertyValue("--site-bg").trim(),
+    text: getComputedStyle(document.documentElement).getPropertyValue("--site-text").trim(),
+    accent: getComputedStyle(document.documentElement).getPropertyValue("--site-accent").trim(),
+    background: backgroundImageData
+  };
+
+  const { error } = await db.from("site_content").update({
+    appearance: settings
+  }).eq("id", 1);
+
+  if (error) {
+    alert("Could not save appearance: " + error.message);
+    return;
+  }
+
+  alert("Appearance saved!");
+  closeAppearance();
+}
+
+async function loadAppearance() {
+  const { data, error } = await db.from("site_content")
+    .select("appearance").eq("id", 1).maybeSingle();
+
+  if (error || !data?.appearance) return;
+
+  const s = data.appearance;
+
+  if (s.theme) setTheme(s.theme);
+  if (s.bg) changeColour("--site-bg", s.bg);
+  if (s.text) changeColour("--site-text", s.text);
+  if (s.accent) changeColour("--site-accent", s.accent);
+
+  if (s.background) {
+    backgroundImageData = s.background;
+    document.documentElement.style.setProperty(
+      "--background-image",
+      "url('" + s.background + "')"
+    );
+    document.body.classList.add("custom-background");
+  }
+}
+
+
 </script>
 </body>
 </html>
