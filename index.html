@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Engineering Portfolio</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy: #101d2b;
+  --cream: #f5f3ed;
+  --accent: #b9a47a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--navy);
+  font-family: Arial, sans-serif;
+}
+nav {
+  padding: 25px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.logo { font-weight: bold; letter-spacing: 2px; }
+nav a { color: white; text-decoration: none; margin-left: 22px; font-size: 13px; }
+nav button, .action {
+  border: 1px solid var(--accent);
+  color: white;
+  background: transparent;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.hero {
+  background: var(--navy);
+  color: white;
+  padding: 110px 10% 125px;
+}
+.eyebrow { color: var(--accent); letter-spacing: 4px; font-size: 12px; }
+h1 { font-size: clamp(45px, 8vw, 90px); margin: 25px 0; line-height: 1.05; }
+.hero p { max-width: 600px; color: #c4cbd1; line-height: 1.8; }
+section { padding: 85px 10%; }
+h2 { font-size: 35px; margin-top: 0; }
+.intro { max-width: 750px; line-height: 1.9; color: #58616b; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+  gap: 22px;
+  margin-top: 35px;
+}
+.card {
+  background: white;
+  padding: 28px;
+  border-bottom: 3px solid var(--accent);
+}
+.card h3 { margin-top: 0; }
+.card p { line-height: 1.7; color: #626b74; }
+.dark { background: var(--navy); color: white; }
+.dark .intro { color: #c4cbd1; }
+.contact { text-align: center; }
+footer { background: var(--navy); color: #c4cbd1; padding: 30px 10%; font-size: 13px; }
+#editor {
+  display: none;
+  position: sticky;
+  top: 70px;
+  z-index: 4;
+  background: #dcebdc;
+  padding: 14px 5%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#editor button {
+  padding: 10px 15px;
+  cursor: pointer;
+  border: 0;
+  background: var(--navy);
+  color: white;
+}
+body.editing [data-edit] {
+  outline: 1px dashed #b18c45;
+  outline-offset: 4px;
+  cursor: text;
+}
+@media(max-width:650px) {
+  nav { flex-wrap: wrap; gap: 15px; }
+  nav a { margin: 0 8px 0 0; }
+  .hero { padding: 75px 8%; }
+  section { padding: 65px 8%; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">HP. PORTFOLIO</div>
+  <div>
+    <a href="#home">HOME</a>
+    <a href="#about">ABOUT</a>
+    <a href="#experience">EXPERIENCE</a>
+    <a href="#projects">PROJECTS</a>
+    <a href="#contact">CONTACT</a>
+  </div>
+  <button onclick="login()">Admin Login</button>
+</nav>
+
+<div id="editor">
+  <strong>EDITING MODE — Only you can see these controls</strong>
+  <span>
+    <button onclick="saveSite()">Save changes</button>
+    <button onclick="logout()">Log out</button>
+  </span>
+</div>
+
+<header class="hero" id="home">
+  <div class="eyebrow" data-edit="eyebrow">ENGINEERING · DESIGN · INNOVATION</div>
+  <h1 data-edit="heading">Hello, I'm<br> Your Name.</h1>
+  <p data-edit="intro">
+    Welcome to my engineering portfolio. Explore my experience,
+    qualifications and projects, and discover the work I'm passionate about.
+  </p>
+  <a class="action" href="#projects" style="display:inline-block;margin-top:20px;text-decoration:none">EXPLORE MY WORK</a>
+</header>
+
+<section id="about">
+  <div class="eyebrow">01 / ABOUT ME</div>
+  <h2 data-edit="aboutTitle">A little about me.</h2>
+  <p class="intro" data-edit="aboutText">
+    I am an aspiring engineer with an interest in technology, design
+    and problem-solving. This is where I share my journey, skills and work.
+    Replace this text with your own introduction.
+  </p>
+</section>
+
+<section class="dark" id="experience">
+  <div class="eyebrow">02 / EXPERIENCE</div>
+  <h2 data-edit="experienceTitle">My experience.</h2>
+  <div class="cards">
+    <article class="card">
+      <h3 data-edit="job1Title">Work Experience</h3>
+      <p data-edit="job1Text">Add details about your work experience, responsibilities and what you learned.</p>
+    </article>
+    <article class="card">
+      <h3 data-edit="job2Title">Practical Skills</h3>
+      <p data-edit="job2Text">Describe your technical skills, hands-on experience and achievements.</p>
+    </article>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="eyebrow">03 / SELECTED WORK</div>
+  <h2 data-edit="projectsTitle">My projects.</h2>
+  <p class="intro" data-edit="projectsIntro">A selection of projects, experiments and ideas I've worked on.</p>
+  <div class="cards">
+    <article class="card">
+      <h3 data-edit="project1Title">Project One</h3>
+      <p data-edit="project1Text">Add a description of your first project, including the process and results.</p>
+    </article>
+    <article class="card">
+      <h3 data-edit="project2Title">Project Two</h3>
+      <p data-edit="project2Text">Showcase another project and explain the skills you developed.</p>
+    </article>
+    <article class="card">
+      <h3 data-edit="project3Title">Project Three</h3>
+      <p data-edit="project3Text">Add another project, photograph or technical achievement.</p>
+    </article>
+  </div>
+</section>
+
+<section class="dark" id="qualifications">
+  <div class="eyebrow">04 / EDUCATION</div>
+  <h2 data-edit="educationTitle">Qualifications.</h2>
+  <p class="intro" data-edit="educationText">Add your education, qualifications, certifications and relevant courses here.</p>
+</section>
+
+<section class="contact" id="contact">
+  <div class="eyebrow">05 / GET IN TOUCH</div>
+  <h2 data-edit="contactTitle">Let's connect.</h2>
+  <p class="intro" style="margin:20px auto" data-edit="contactText">Interested in working together or learning more about my work? Get in touch.</p>
+  <p data-edit="email">your-email@example.com</p>
+</section>
+
+<footer>
+  <span data-edit="footer">© 2026 My Engineering Portfolio. All rights reserved.</span>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://uwfjsvjwwgbupfxwznvg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Sul7wobHWlqCl0x7tT4YUw_V3afz6Wx";
+const OWNER_EMAIL = "helipatelonly@gmail.com";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let isOwner = false;
+
+async function loadSite() {
+  const { data, error } = await db
+    .from("site_content")
+    .select("content")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data && data.content) {
+    document.querySelectorAll("[data-edit]").forEach(el => {
+      const value = data.content[el.dataset.edit];
+      if (typeof value === "string") el.textContent = value;
+    });
+  }
+}
+
+async function login() {
+  const email = prompt("Admin email:");
+  if (!email) return;
+
+  const password = prompt("Your admin password:");
+  if (!password) return;
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email, password
+  });
+
+  if (error) {
+    alert("Login failed: " + error.message);
+    return;
+  }
+
+  if (data.user.email.toLowerCase() !== OWNER_EMAIL.toLowerCase()) {
+    await db.auth.signOut();
+    alert("This account is not authorised to edit this website.");
+    return;
+  }
+
+  enableEditing();
+}
+
+function enableEditing() {
+  isOwner = true;
+  document.body.classList.add("editing");
+  document.getElementById("editor").style.display = "flex";
+
+  document.querySelectorAll("[data-edit]").forEach(el => {
+    el.contentEditable = "true";
+  });
+
+  alert("Editing mode enabled! Click any text to change it.");
+}
+
+async function saveSite() {
+  if (!isOwner) return;
+
+  const content = {};
+  document.querySelectorAll("[data-edit]").forEach(el => {
+    content[el.dataset.edit] = el.innerText;
+  });
+
+  const { error } = await db.from("site_content").upsert({
+    id: 1,
+    content: content,
+    updated_at: new Date().toISOString()
+  });
+
+  if (error) {
+    alert("Could not save: " + error.message);
+  } else {
+    alert("Your changes have been saved and published!");
+  }
+}
+
+async function logout() {
+  await db.auth.signOut();
+  isOwner = false;
+  document.body.classList.remove("editing");
+  document.getElementById("editor").style.display = "none";
+
+  document.querySelectorAll("[data-edit]").forEach(el => {
+    el.contentEditable = "false";
+  });
+
+  await loadSite();
+}
+
+async function checkSession() {
+  const { data } = await db.auth.getSession();
+  const user = data.session?.user;
+
+  if (user && user.email.toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+    enableEditing();
+  } else if (user) {
+    await db.auth.signOut();
+  }
+}
+
+loadSite();
+checkSession();
+</script>
+</body>
+</html>
