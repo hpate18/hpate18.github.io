@@ -163,6 +163,41 @@ body.editing [data-edit] {
 }
 </style>
 </head>
+
+<!-- APPEARANCE EDITOR -->
+<div id="appearance-panel">
+  <h2>Website Appearance</h2>
+
+  <h3>Colour theme</h3>
+  <button onclick="setTheme('light')">☀️ Light mode</button>
+  <button onclick="setTheme('dark')">🌙 Dark mode</button>
+
+  <h3>Custom colours</h3>
+
+  <label>Background colour</label>
+  <input type="color" id="bgColour" value="#f5f3ed"
+    onchange="changeColour('--site-bg',this.value)">
+
+  <label>Text colour</label>
+  <input type="color" id="textColour" value="#101d2b"
+    onchange="changeColour('--site-text',this.value)">
+
+  <label>Accent colour</label>
+  <input type="color" id="accentColour" value="#b9a47a"
+    onchange="changeColour('--site-accent',this.value)">
+
+  <h3>Background image</h3>
+  <input type="file" id="backgroundUpload" accept="image/*"
+    onchange="uploadBackground(event)">
+
+  <label>Image brightness</label>
+  <input type="range" id="brightness" min="20" max="100" value="100"
+    oninput="setBrightness(this.value)">
+
+  <button onclick="saveAppearance()">Save appearance</button>
+  <button onclick="closeAppearance()">Close</button>
+</div>
+
 <body>
 
 <nav>
