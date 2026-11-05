@@ -1,311 +1,2345 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Engineering Portfolio</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{
- --bg:#0b1422;--surface:#152337;--text:#f7f7f4;--muted:#b7c0cb;--accent:#d4b16a;
- --hero:#08111e;--line:#344256;--font:Inter,Arial,sans-serif;--radius:16px;
-}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);transition:.2s}
-a{color:inherit}button,input,select,textarea{font:inherit}
-.topbar{position:sticky;top:0;z-index:20;background:var(--hero);color:#fff;padding:15px clamp(18px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.brand{font-weight:800;letter-spacing:2px;text-decoration:none}.top-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.btn{border:1px solid var(--accent);background:transparent;color:inherit;padding:10px 14px;border-radius:9px;cursor:pointer}.btn.primary{background:var(--accent);color:#101820;border-color:var(--accent);font-weight:700}.btn:hover{filter:brightness(1.08)}
-.nav-grid{display:grid;grid-template-columns:repeat(5,minmax(100px,1fr));gap:8px;padding:14px clamp(18px,5vw,72px);background:#0e1a27}
-.nav-grid a{padding:11px 12px;text-align:center;text-decoration:none;color:#e9edf0;border:1px solid #ffffff24;border-radius:10px;font-size:12px;letter-spacing:1px}.nav-grid a:hover{background:#ffffff18}
-.hero{background:var(--hero);color:white;padding:clamp(65px,10vw,130px) clamp(22px,10vw,150px);position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;width:340px;height:340px;border:1px solid #ffffff20;border-radius:50%;right:-100px;bottom:-190px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff06}
-.eyebrow{color:var(--accent);font-size:11px;letter-spacing:3px;text-transform:uppercase}.hero h1{font-size:clamp(42px,7vw,82px);line-height:1.04;margin:22px 0;max-width:850px}.hero p{color:#cbd2d9;max-width:650px;line-height:1.8}.hero .btn{display:inline-block;text-decoration:none;margin-top:18px}
-main{max-width:1240px;margin:auto;padding:0 clamp(18px,5vw,64px)}
-.section{padding:76px 0;scroll-margin-top:120px}.section.dark{background:var(--hero);color:#fff;max-width:none;padding:76px max(5vw,calc((100vw - 1110px)/2))}
-.section h2{font-size:clamp(28px,4vw,40px);margin:14px 0}.section .lead{color:var(--muted);line-height:1.85;max-width:780px}.section.dark .lead{color:#cbd2d9}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:30px}
-.card{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:var(--radius);padding:25px;box-shadow:0 8px 25px #1323330a;min-height:130px}
-.card h3{margin:0 0 12px}.card p{color:var(--muted);line-height:1.75}.shape{display:inline-block;width:72px;height:72px;background:var(--accent);margin:12px;border-radius:12px}.shape.circle{border-radius:50%}.shape.diamond{transform:rotate(45deg);border-radius:5px}
-.block{position:relative}.editing [data-block]{outline:1px dashed #c49a4a;outline-offset:4px;cursor:text}.editing [data-block]:focus{outline:2px solid var(--accent)}
-footer{background:var(--hero);color:#cbd2d9;padding:28px clamp(18px,5vw,72px);font-size:13px}
-#adminbar{display:none;position:sticky;top:64px;z-index:19;background:#e5eee8;color:#132a20;padding:12px clamp(14px,4vw,45px);align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;box-shadow:0 4px 14px #0001}
-.editing #adminbar{display:flex}.admin-tools{display:flex;gap:7px;flex-wrap:wrap}.admin-tools .btn{background:#142333;color:#fff;border:0;padding:9px 11px;font-size:13px}
-#editor-panel{display:none;position:fixed;right:16px;top:110px;bottom:16px;width:min(360px,calc(100vw - 32px));overflow:auto;background:var(--surface);color:var(--text);z-index:40;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 18px 60px #0004}
-#editor-panel.open{display:block}.panel-head{display:flex;justify-content:space-between;align-items:center}.panel-head h3{margin:0 0 14px}
-.field{display:grid;gap:6px;margin:13px 0;font-size:13px;color:var(--muted)}.field input,.field select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text)}
-.field input[type=color]{height:40px;padding:3px}.field input[type=range]{padding:0}
-.toolbar{display:none;position:sticky;top:115px;z-index:18;background:#fff;color:#182635;padding:9px;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.editing .toolbar{display:flex}.toolbar button,.toolbar select,.toolbar input{padding:7px;border:1px solid #d5dce0;border-radius:6px;background:#fff;color:#172536;cursor:pointer}
-.login-modal{display:none;position:fixed;inset:0;background:#07111dcc;z-index:60;place-items:center;padding:20px}.login-modal.open{display:grid}.login-card{background:#fff;color:#172536;padding:28px;border-radius:16px;width:min(400px,100%)}.login-card h2{margin-top:0}.login-card input{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #ccd3d9;border-radius:8px}
-.notice{font-size:12px;color:var(--muted);line-height:1.5}.hidden{display:none!important}
-@media(max-width:700px){.nav-grid{grid-template-columns:repeat(2,1fr)}.section.dark{padding:60px 22px}.topbar{top:0}.toolbar{top:110px}}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Engineering Portfolio</title>
 
-/* Dashboard navigation + permanently enabled navy/gold/white dark theme */
-body{background:#0b1422;color:#f7f7f4;color-scheme:dark}
-.nav-grid{
- max-width:980px;margin:0 auto;padding:20px clamp(18px,5vw,48px) 26px;
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
- background:#0b1422;
-}
-.nav-grid a{
- min-height:104px;padding:15px 18px;text-align:left;text-decoration:none;
- display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;
- color:#f7f7f4;background:#19283c;border:1px solid #34445a;border-radius:13px;
- letter-spacing:0;transition:background .18s,border-color .18s,transform .18s;
-}
-.nav-grid a:hover,.nav-grid a:focus-visible{
- background:#22344c;border-color:#d4b16a;transform:translateY(-2px);outline:none;
-}
-.nav-grid a .nav-icon{font-size:21px;line-height:1;color:#d4b16a;margin-bottom:4px}
-.nav-grid a strong{font-size:15px;font-weight:700}
-.nav-grid a small{font-size:11px;color:#b7c0cb}
-.hero{background:#08111e}
-.section{scroll-margin-top:24px}
-.section:not(.dark){color:#f7f7f4}
-.section .lead,.card p{color:#b7c0cb}
-.card{background:#152337;color:#f7f7f4;border-color:#344256;box-shadow:0 8px 24px #0003}
-.section.dark{background:#101d30;color:#f7f7f4}
-footer{background:#08111e;color:#cbd2d9}
-#adminbar{background:#182b25;color:#f4fff7}
-.toolbar{background:#152337;color:#f7f7f4;border-color:#344256}
-.toolbar button,.toolbar select,.toolbar input{background:#0b1422;color:#f7f7f4;border-color:#526176}
-#editor-panel{background:#152337;color:#f7f7f4;border-color:#344256}
-.field{color:#c0cad5}
-.field input,.field select{background:#0b1422;color:#f7f7f4;border-color:#46566b}
-@media(max-width:520px){
- .nav-grid{gap:9px;padding:14px 16px 20px}
- .nav-grid a{min-height:88px;padding:12px}
- .nav-grid a strong{font-size:14px}
+  <!-- PART 2: CSS will go here -->
+  <style>
+  
+/* =========================================
+   1. GLOBAL THEME VARIABLES
+========================================= */
+
+:root {
+  --primary: #101d35;
+  --accent: #d5ad55;
+  --background: #ffffff;
+  --surface: #f5f6f8;
+  --text: #172033;
+  --muted: #737d8d;
+  --border: #e1e4e9;
+  --card: #ffffff;
+  --header: #ffffff;
+  --footer: #101d35;
+  --font-family: Arial, sans-serif;
+  --global-font-size: 16px;
+
+  --shadow: 0 8px 30px rgba(16, 29, 53, 0.08);
+  --radius: 14px;
+  --transition: 0.25s ease;
 }
 
-</style>
+body.dark-mode {
+  --background: #0b1220;
+  --surface: #111c2e;
+  --text: #edf1f7;
+  --muted: #a5afbf;
+  --border: #26344a;
+  --card: #142035;
+  --header: #0e192b;
+  --footer: #070d18;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================================
+   2. GENERAL RESET
+========================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-family);
+  font-size: var(--global-font-size);
+  line-height: 1.6;
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* =========================================
+   3. HEADER AND NAVIGATION
+========================================= */
+
+.site-header {
+  min-height: 88px;
+  padding: 16px 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: var(--header);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background var(--transition);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  color: white;
+  border-radius: 10px;
+  font-size: 21px;
+}
+
+.brand-name {
+  font-size: 12px;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.nav-tab {
+  min-width: 75px;
+  padding: 10px 15px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.nav-tab:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.nav-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 21px;
+  transition: var(--transition);
+}
+
+.icon-button:hover {
+  transform: rotate(20deg);
+  border-color: var(--accent);
+}
+
+/* =========================================
+   4. EDITOR TOOLBAR
+========================================= */
+
+.editor-toolbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editor-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+#saveStatus {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.toolbar-right button {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.toolbar-right button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#saveBtn,
+#publishBtn {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+#publishBtn {
+  background: var(--accent);
+  color: #101d35;
+  border-color: var(--accent);
+}
+
+/* =========================================
+   5. MAIN WEBSITE CANVAS
+========================================= */
+
+.website-canvas {
+  width: 100%;
+  min-height: 70vh;
+  position: relative;
+  background: var(--background);
+  transition: background var(--transition);
+}
+
+.page-section {
+  display: none;
+  min-height: 65vh;
+  padding: 65px 8%;
+  position: relative;
+}
+
+.page-section.active-section {
+  display: block;
+}
+
+/* =========================================
+   6. HERO SECTION
+========================================= */
+
+.hero-section {
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  position: relative;
+  overflow: hidden;
+  padding: 65px 0;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 650px;
+  position: relative;
+  z-index: 2;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.hero-content h1 {
+  font-size: clamp(42px, 6vw, 76px);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin-bottom: 25px;
+  color: var(--text);
+}
+
+.hero-description {
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 17px;
+  margin-bottom: 30px;
+}
+
+.hero-button {
+  background: var(--primary);
+  color: white;
+  padding: 14px 25px;
+  border-radius: 7px;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.hero-button:hover {
+  background: var(--accent);
+  color: #101d35;
+  transform: translateY(-3px);
+}
+
+.hero-decoration {
+  flex: 1;
+  min-height: 350px;
+  max-width: 430px;
+  position: relative;
+}
+
+.hero-shape {
+  position: absolute;
+  border-radius: 25px;
+  transform: rotate(-12deg);
+}
+
+.shape-one {
+  width: 230px;
+  height: 230px;
+  right: 35px;
+  top: 25px;
+  background: var(--primary);
+}
+
+.shape-two {
+  width: 170px;
+  height: 170px;
+  right: 155px;
+  top: 135px;
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+.shape-three {
+  width: 100px;
+  height: 100px;
+  right: 0;
+  bottom: 10px;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+}
+
+/* =========================================
+   7. CONTENT SECTIONS
+========================================= */
+
+.content-section {
+  padding: 75px 0;
+  max-width: 800px;
+  border-top: 1px solid var(--border);
+}
+
+.content-section h2,
+.section-heading h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.content-section p:not(.eyebrow),
+.section-heading > p:not(.eyebrow) {
+  color: var(--muted);
+}
+
+.section-heading {
+  margin-bottom: 45px;
+  max-width: 750px;
+}
+
+.section-heading h1 {
+  font-size: clamp(38px, 5vw, 58px);
+}
+
+.section-heading > p:not(.eyebrow) {
+  font-size: 16px;
+}
+
+/* =========================================
+   8. PROJECT CARDS
+========================================= */
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 25px;
+}
+
+.project-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+}
+
+.project-image-placeholder {
+  height: 190px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: var(--accent);
+  font-size: 55px;
+  font-weight: 800;
+}
+
+.project-card-content {
+  padding: 25px;
+}
+
+.project-card-content h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.project-card-content p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.text-button {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* =========================================
+   9. ABOUT SECTION
+========================================= */
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: center;
+  gap: 55px;
+}
+
+.about-image-placeholder {
+  min-height: 350px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: var(--accent);
+  border-radius: var(--radius);
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.about-content h2 {
+  font-size: 29px;
+  margin-bottom: 18px;
+}
+
+.about-content p {
+  color: var(--muted);
+  margin-bottom: 30px;
+}
+
+.about-content h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+/* =========================================
+   10. CONTACT SECTION
+========================================= */
+
+.contact-details {
+  padding: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 650px;
+}
+
+.contact-details p {
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   11. FOOTER
+========================================= */
+
+.site-footer {
+  background: var(--footer);
+  color: white;
+  padding: 28px 6%;
+  text-align: center;
+  font-size: 12px;
+}
+
+.site-footer p {
+  color: #dce2ed;
+}
+
+/* =========================================
+   12. DESIGN PANEL
+========================================= */
+
+.design-panel {
+  position: fixed;
+  top: 110px;
+  right: 20px;
+  width: 310px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  box-shadow: var(--shadow);
+  z-index: 500;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.panel-heading h2 {
+  font-size: 19px;
+}
+
+#closeDesignBtn,
+.modal-close {
+  background: transparent;
+  color: var(--text);
+  font-size: 24px;
+}
+
+.design-panel section {
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+
+.design-panel h3 {
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.design-panel label,
+.selection-panel label,
+.modal-content label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 12px 0 6px;
+}
+
+.design-panel input:not([type="color"]):not([type="file"]),
+.design-panel select,
+.selection-panel input:not([type="checkbox"]),
+.modal-content input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--text);
+}
+
+.design-panel input[type="color"] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+}
+
+.design-panel input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.design-panel input[type="file"] {
+  width: 100%;
+  font-size: 11px;
+}
+
+.design-panel button,
+.selection-panel button {
+  padding: 9px 12px;
+  margin: 5px 3px 5px 0;
+  border-radius: 6px;
+  background: var(--primary);
+  color: white;
+  font-size: 12px;
+}
+
+/* =========================================
+   13. SELECTED ELEMENT PANEL
+========================================= */
+
+.selection-panel {
+  position: fixed;
+  left: 20px;
+  top: 160px;
+  width: 235px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  z-index: 450;
+}
+
+.selection-panel h3 {
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+.selection-panel button:hover {
+  background: var(--accent);
+  color: var(--primary);
+}
+
+/* =========================================
+   14. LOGIN MODAL
+========================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 400px;
+  padding: 35px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.modal-content h2 {
+  margin-bottom: 8px;
+}
+
+.modal-content > p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.modal-content input {
+  margin-bottom: 10px;
+}
+
+#submitLoginBtn,
+#logoutBtn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 7px;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+}
+
+.modal-close {
+  float: right;
+}
+
+/* =========================================
+   15. EDITING AND RESIZING
+========================================= */
+
+.editable-text {
+  cursor: text;
+  outline: none;
+}
+
+.editable-text:focus {
+  outline: 1px dashed var(--accent);
+  outline-offset: 4px;
+}
+
+.editable-item {
+  position: relative;
+}
+
+.editor-selected {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: var(--accent);
+  border: 2px solid white;
+  border-radius: 50%;
+  z-index: 20;
+}
+
+.resize-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.resize-handle.n  { top: -6px; left: calc(50% - 5px); cursor: ns-resize; }
+.resize-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.resize-handle.e  { right: -6px; top: calc(50% - 5px); cursor: ew-resize; }
+.resize-handle.se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+.resize-handle.s  { bottom: -6px; left: calc(50% - 5px); cursor: ns-resize; }
+.resize-handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.resize-handle.w  { left: -6px; top: calc(50% - 5px); cursor: ew-resize; }
+
+/* =========================================
+   16. CUSTOM EDITOR ELEMENTS
+========================================= */
+
+.custom-text,
+.custom-shape,
+.custom-card {
+  position: absolute;
+  min-width: 60px;
+  min-height: 40px;
+  padding: 15px;
+  border: 1px dashed var(--accent);
+  z-index: 10;
+}
+
+.custom-text {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.custom-shape {
+  background: var(--accent);
+  border-radius: 8px;
+}
+
+.custom-card {
+  background: var(--card);
+  color: var(--text);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+/* =========================================
+   17. RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-decoration {
+    opacity: 0.6;
+  }
+
+  .about-layout {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 650px) {
+  .site-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 14px 5%;
+  }
+
+  .brand {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .main-nav {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .nav-tab {
+    min-width: 0;
+    flex: 1;
+    padding: 9px 5px;
+    font-size: 11px;
+  }
+
+  .editor-toolbar {
+    justify-content: center;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    justify-content: center;
+  }
+
+  .page-section {
+    padding: 45px 6%;
+  }
+
+  .hero-section {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: auto;
+    gap: 20px;
+  }
+
+  .hero-decoration {
+    width: 100%;
+    min-height: 230px;
+  }
+
+  .shape-one {
+    width: 160px;
+    height: 160px;
+  }
+
+  .shape-two {
+    width: 120px;
+    height: 120px;
+    right: 120px;
+  }
+
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .about-image-placeholder {
+    min-height: 240px;
+  }
+
+  .design-panel {
+    top: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    max-height: 80vh;
+  }
+
+  .selection-panel {
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    max-height: 40vh;
+  }
+}
+
+/* =========================================
+   18. BACKGROUND IMAGE SUPPORT
+========================================= */
+
+.website-canvas.has-background-image {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* =========================================
+   19. PRINT STYLING
+========================================= */
+
+@media print {
+  .site-header,
+  .editor-toolbar,
+  .design-panel,
+  .selection-panel {
+    display: none !important;
+  }
+
+  .page-section {
+    display: block !important;
+    page-break-after: always;
+  }
+}
+
+  </style>
 </head>
+
 <body>
-<header class="topbar">
- <a class="brand" href="#home">HP. PORTFOLIO</a>
- <div class="top-actions"><button class="btn" id="loginBtn">Admin login</button><button class="btn hidden" id="logoutBtn">Log out</button></div>
-</header>
-<nav class="nav-grid" id="navigation" aria-label="Main navigation">
- <a href="#home"><span class="nav-icon" aria-hidden="true">⌂</span><strong>Home</strong><small>Open section</small></a>
- <a href="#projects"><span class="nav-icon" aria-hidden="true">▦</span><strong>Projects</strong><small>Open section</small></a>
- <a href="#about"><span class="nav-icon" aria-hidden="true">◇</span><strong>About</strong><small>Open section</small></a>
- <a href="#contact"><span class="nav-icon" aria-hidden="true">✉</span><strong>Contact</strong><small>Open section</small></a>
-</nav>
-<div id="adminbar">
- <strong>ADMIN EDITOR · Changes are private until saved</strong>
- <div class="admin-tools">
-  <button class="btn" id="addText">+ Text</button><button class="btn" id="addCard">+ Card</button><button class="btn" id="addShape">+ Shape</button><button class="btn" id="addSection">+ Tab / section</button><button class="btn" id="designBtn">Design</button><button class="btn primary" id="saveBtn">Save & publish</button>
- </div>
-</div>
-<div class="toolbar" id="formatToolbar">
- <button data-cmd="bold"><b>B</b></button><button data-cmd="italic"><i>I</i></button><button data-cmd="underline"><u>U</u></button><button data-cmd="hiliteColor" data-value="#fff09a">Highlight</button>
- <label>Text <input type="color" id="fontColour" value="#142333"></label>
- <label>Size <select id="fontSize"><option value="2">Small</option><option value="3" selected>Normal</option><option value="4">Large</option><option value="5">Very large</option><option value="6">Heading</option></select></label>
- <label>Font <select id="fontFamily"><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option><option value="Trebuchet MS">Trebuchet</option><option value="Courier New">Courier</option></select></label>
- <button id="linkBtn">Link</button><button id="unlinkBtn">Unlink</button>
-</div>
-<header class="hero" id="home">
- <div class="eyebrow" data-block="heroEyebrow">ENGINEERING · DESIGN · INNOVATION</div>
- <h1 data-block="heroTitle">Hello, I'm<br> Your Name.</h1>
- <p data-block="heroIntro">Welcome to my engineering portfolio. Explore my experience, qualifications and projects, and discover the work I'm passionate about.</p>
- <a class="btn" href="#projects">EXPLORE MY WORK</a>
-</header>
-<main id="content">
- <section class="section" id="about" data-section>
-  <div class="eyebrow">01 / ABOUT ME</div><h2 data-block="aboutTitle">A little about me.</h2>
-  <p class="lead" data-block="aboutText">I am an aspiring engineer with an interest in technology, design and problem-solving. This is where I share my journey, skills and work.</p>
- </section>
- <section class="section dark" id="experience" data-section>
-  <div class="eyebrow">02 / EXPERIENCE</div><h2 data-block="experienceTitle">My experience.</h2>
-  <div class="cards" data-card-grid>
-   <article class="card"><h3 data-block="job1Title">Work Experience</h3><p data-block="job1Text">Add details about your work experience, responsibilities and what you learned.</p></article>
-   <article class="card"><h3 data-block="job2Title">Practical Skills</h3><p data-block="job2Text">Describe your technical skills, hands-on experience and achievements.</p></article>
-  </div>
- </section>
- <section class="section" id="projects" data-section>
-  <div class="eyebrow">03 / SELECTED WORK</div><h2 data-block="projectsTitle">My projects.</h2>
-  <p class="lead" data-block="projectsIntro">A selection of projects, experiments and ideas I've worked on.</p>
-  <div class="cards" data-card-grid>
-   <article class="card"><h3 data-block="project1Title">Project One</h3><p data-block="project1Text">Add a description of your first project, including the process and results.</p></article>
-   <article class="card"><h3 data-block="project2Title">Project Two</h3><p data-block="project2Text">Showcase another project and explain the skills you developed.</p></article>
-   <article class="card"><h3 data-block="project3Title">Project Three</h3><p data-block="project3Text">Add another project, photograph or technical achievement.</p></article>
-  </div>
- </section>
- <section class="section dark" id="education" data-section>
-  <div class="eyebrow">04 / EDUCATION</div><h2 data-block="educationTitle">Qualifications.</h2>
-  <p class="lead" data-block="educationText">Add your education, qualifications, certifications and relevant courses here.</p>
- </section>
- <section class="section" id="contact" data-section>
-  <div class="eyebrow">05 / GET IN TOUCH</div><h2 data-block="contactTitle">Let's connect.</h2>
-  <p class="lead" data-block="contactText">Interested in working together or learning more about my work? Get in touch.</p>
-  <p data-block="email">your-email@example.com</p>
- </section>
-</main>
-<footer><span data-block="footer">© 2026 My Engineering Portfolio. All rights reserved.</span></footer>
 
-<aside id="editor-panel">
- <div class="panel-head"><h3>Website design</h3><button class="btn" id="closeDesign">✕</button></div>
- <h4>Global theme</h4>
- <label class="field">Theme colour <input type="color" id="accentPick" value="#b99d69"></label>
- <label class="field">Page background <input type="color" id="bgPick" value="#f4f2ec"></label>
- <label class="field">Text colour <input type="color" id="textPick" value="#142333"></label>
- <label class="field">Card / surface colour <input type="color" id="surfacePick" value="#ffffff"></label>
- <label class="field">Hero / dark section colour <input type="color" id="heroPick" value="#142333"></label>
- <label class="field">Website font <select id="siteFont"><option value="Inter,Arial,sans-serif">Modern sans-serif</option><option value="Georgia,serif">Georgia</option><option value="Verdana,sans-serif">Verdana</option><option value="'Courier New',monospace">Monospace</option></select></label>
- <label class="field">Card corner roundness <input type="range" min="0" max="32" value="16" id="radiusPick"></label>
- <label class="field">Background image <input type="file" id="backgroundFile" accept="image/*"></label>
- <label class="field">Background image brightness <input type="range" min="20" max="100" value="100" id="brightnessPick"></label>
- <h4>Selected section layout</h4>
- <label class="field">Layout <select id="layoutPick"><option value="grid">Grid</option><option value="list">List</option><option value="feature">Feature / wide cards</option></select></label>
- <label class="field">Section background <input type="color" id="sectionBgPick" value="#f4f2ec"></label>
- <button class="btn primary" id="applyDesign">Apply design</button>
- <p class="notice">Design changes are saved when you choose “Save & publish”. Background uploads use the Supabase Storage bucket configured in the setup instructions.</p>
-</aside>
-<div class="login-modal" id="loginModal">
- <form class="login-card" id="loginForm">
-  <h2>Administrator login</h2><p class="notice">Sign in with your authorised Supabase account.</p>
-  <label>Email<input id="adminEmail" type="email" autocomplete="username" required></label>
-  <label>Password<input id="adminPassword" type="password" autocomplete="current-password" required></label>
-  <button class="btn primary" type="submit">Sign in</button> <button class="btn" type="button" id="cancelLogin">Cancel</button>
-  <p id="loginError" class="notice" role="alert"></p>
- </form>
-</div>
-<script>
-/* Keep the publishable key in the browser. Never put a Supabase service-role key here. */
-const SUPABASE_URL = "https://uwfjsvjwwgbupfxwznvg.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Sul7wobHWlqCl0x7tT4YUw_V3afz6Wx";
-const OWNER_EMAIL = "helipatelonly@gmail.com";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let isOwner = false, activeSection = null, backgroundPath = null;
-const $ = id => document.getElementById(id);
-const defaultContent = {};
-const defaultDesign = {accent:"#d4b16a",bg:"#0b1422",text:"#f7f7f4",surface:"#152337",hero:"#08111e",font:"Inter,Arial,sans-serif",radius:12,brightness:100,backgroundPath:null};
-let design = {...defaultDesign};
+  <!-- TOP NAVIGATION -->
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark">P.</span>
+      <span class="brand-name">MY PORTFOLIO</span>
+    </div>
 
-function applyDesign(d=design){
- design={...defaultDesign,...d};
- const root=document.documentElement;
- root.style.setProperty("--accent",design.accent);root.style.setProperty("--bg",design.bg);
- root.style.setProperty("--text",design.text);root.style.setProperty("--surface",design.surface);
- root.style.setProperty("--hero",design.hero);root.style.setProperty("--font",design.font);
- root.style.setProperty("--radius",design.radius+"px");
- document.body.style.backgroundImage=design.backgroundUrl?`linear-gradient(rgba(0,0,0,${(100-design.brightness)/150}),rgba(0,0,0,${(100-design.brightness)/150})),url("${design.backgroundUrl}")`:"none";
+    <nav class="main-nav" aria-label="Main navigation">
+      <button class="nav-tab active" data-section="home">Home</button>
+      <button class="nav-tab" data-section="projects">Projects</button>
+      <button class="nav-tab" data-section="about">About</button>
+      <button class="nav-tab" data-section="contact">Contact</button>
+    </nav>
+
+    <button id="themeToggle" class="icon-button" type="button"
+      aria-label="Toggle light and dark mode">
+      ☼
+    </button>
+  </header>
+
+  <!-- EDITOR TOOLBAR -->
+  <div class="editor-toolbar">
+    <div class="toolbar-left">
+      <span class="editor-label">PORTFOLIO EDITOR</span>
+      <span id="saveStatus">Unsaved changes</span>
+    </div>
+
+    <div class="toolbar-right">
+      <button id="addTextBtn" type="button">+ Text</button>
+      <button id="addCardBtn" type="button">+ Card</button>
+      <button id="addShapeBtn" type="button">+ Shape</button>
+      <button id="designBtn" type="button">Design</button>
+      <button id="loginBtn" type="button">Log in</button>
+      <button id="saveBtn" type="button">Save</button>
+      <button id="publishBtn" type="button">Publish</button>
+    </div>
+  </div>
+
+  <!-- DESIGN PANEL -->
+  <aside id="designPanel" class="design-panel" hidden>
+    <div class="panel-heading">
+      <h2>Design settings</h2>
+      <button id="closeDesignBtn" type="button">×</button>
+    </div>
+
+    <section>
+      <h3>Colour theme</h3>
+      <label for="themePreset">Theme preset</label>
+      <select id="themePreset">
+        <option value="navy-gold">Navy, Gold & White</option>
+        <option value="monochrome">Monochrome</option>
+        <option value="forest">Forest Green</option>
+        <option value="custom">Custom</option>
+      </select>
+
+      <label for="primaryColour">Primary colour</label>
+      <input type="color" id="primaryColour" value="#101d35">
+
+      <label for="accentColour">Accent colour</label>
+      <input type="color" id="accentColour" value="#d5ad55">
+
+      <label for="backgroundColour">Background colour</label>
+      <input type="color" id="backgroundColour" value="#ffffff">
+
+      <label for="textColour">Text colour</label>
+      <input type="color" id="textColour" value="#172033">
+    </section>
+
+    <section>
+      <h3>Typography</h3>
+      <label for="fontFamily">Font family</label>
+      <select id="fontFamily">
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Trebuchet MS">Trebuchet MS</option>
+      </select>
+
+      <label for="globalFontSize">Global font size</label>
+      <input type="range" id="globalFontSize" min="12" max="32" value="16">
+    </section>
+
+    <section>
+      <h3>Background image</h3>
+      <input type="file" id="backgroundUpload" accept="image/*">
+      <button id="removeBackgroundBtn" type="button">Remove image</button>
+    </section>
+  </aside>
+
+  <!-- MAIN WEBSITE CONTENT -->
+  <main id="websiteCanvas" class="website-canvas">
+
+    <!-- HOME SECTION -->
+    <section id="home" class="page-section active-section" data-section="home">
+      <div class="hero-section">
+        <div class="hero-content">
+          <p class="eyebrow">ENGINEERING • INNOVATION • CREATIVITY</p>
+
+          <h1 contenteditable="true" class="editable-text">
+            Building ideas into reality.
+          </h1>
+
+          <p contenteditable="true" class="editable-text hero-description">
+            Welcome to my engineering portfolio. Explore my projects,
+            skills, experiences and the ideas that inspire me.
+          </p>
+
+          <button class="hero-button" data-section-link="projects">
+            Explore my work
+          </button>
+        </div>
+
+        <div class="hero-decoration">
+          <div class="hero-shape shape-one"></div>
+          <div class="hero-shape shape-two"></div>
+          <div class="hero-shape shape-three"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <p class="eyebrow">WELCOME</p>
+        <h2 contenteditable="true" class="editable-text">
+          A little introduction
+        </h2>
+        <p contenteditable="true" class="editable-text">
+          Add a short introduction about yourself, your interests and
+          what you hope to achieve through engineering.
+        </p>
+      </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section id="projects" class="page-section" data-section="projects">
+      <div class="section-heading">
+        <p class="eyebrow">MY WORK</p>
+        <h1 contenteditable="true" class="editable-text">Projects</h1>
+        <p contenteditable="true" class="editable-text">
+          A collection of ideas, designs and engineering projects.
+        </p>
+      </div>
+
+      <div id="projectGrid" class="project-grid">
+        <article class="project-card editable-item">
+          <div class="project-image-placeholder">01</div>
+          <div class="project-card-content">
+            <p class="eyebrow">ENGINEERING PROJECT</p>
+            <h2 contenteditable="true" class="editable-text">
+              Smart T.R.A.C.S.
+            </h2>
+            <p contenteditable="true" class="editable-text">
+              An AI-powered traffic management concept designed to
+              improve road safety and traffic efficiency.
+            </p>
+            <button type="button" class="text-button">View project →</button>
+          </div>
+        </article>
+
+        <article class="project-card editable-item">
+          <div class="project-image-placeholder">02</div>
+          <div class="project-card-content">
+            <p class="eyebrow">DESIGN & DEVELOPMENT</p>
+            <h2 contenteditable="true" class="editable-text">
+              Project title
+            </h2>
+            <p contenteditable="true" class="editable-text">
+              Add a description of another project, including the
+              problem, your approach and the outcome.
+            </p>
+            <button type="button" class="text-button">View project →</button>
+          </div>
+        </article>
+
+        <article class="project-card editable-item">
+          <div class="project-image-placeholder">03</div>
+          <div class="project-card-content">
+            <p class="eyebrow">RESEARCH & INNOVATION</p>
+            <h2 contenteditable="true" class="editable-text">
+              Project title
+            </h2>
+            <p contenteditable="true" class="editable-text">
+              Add another project or piece of work you would like
+              visitors to explore.
+            </p>
+            <button type="button" class="text-button">View project →</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="page-section" data-section="about">
+      <div class="section-heading">
+        <p class="eyebrow">GET TO KNOW ME</p>
+        <h1 contenteditable="true" class="editable-text">About me</h1>
+      </div>
+
+      <div class="about-layout">
+        <div class="about-image-placeholder">YOUR IMAGE</div>
+        <div class="about-content">
+          <h2 contenteditable="true" class="editable-text">
+            My journey so far
+          </h2>
+          <p contenteditable="true" class="editable-text">
+            Write about your background, education, interests and
+            what motivates you.
+          </p>
+
+          <h3 contenteditable="true" class="editable-text">My skills</h3>
+          <p contenteditable="true" class="editable-text">
+            Add your technical skills, software knowledge,
+            teamwork and problem-solving abilities.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="page-section" data-section="contact">
+      <div class="section-heading">
+        <p class="eyebrow">LET'S CONNECT</p>
+        <h1 contenteditable="true" class="editable-text">
+          Get in touch.
+        </h1>
+        <p contenteditable="true" class="editable-text">
+          Interested in collaborating or learning more about my work?
+          Feel free to get in touch.
+        </p>
+      </div>
+
+      <div class="contact-details">
+        <p>Email: <span contenteditable="true">your-email@example.com</span></p>
+        <p>LinkedIn: <span contenteditable="true">Add your LinkedIn profile</span></p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- EDITOR CONTROLS FOR SELECTED OBJECTS -->
+  <aside id="selectionPanel" class="selection-panel" hidden>
+    <h3>Selected element</h3>
+
+    <label for="objectWidth">Width</label>
+    <input type="number" id="objectWidth" min="10">
+
+    <label for="objectHeight">Height</label>
+    <input type="number" id="objectHeight" min="10">
+
+    <label for="objectFontSize">Text size</label>
+    <input type="number" id="objectFontSize" min="8" max="120">
+
+    <label>
+      <input type="checkbox" id="lockAspectRatio">
+      Lock proportions
+    </label>
+
+    <button id="duplicateBtn" type="button">Duplicate</button>
+    <button id="deleteBtn" type="button">Delete</button>
+    <button id="bringForwardBtn" type="button">Bring forward</button>
+    <button id="sendBackwardBtn" type="button">Send backward</button>
+  </aside>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal" hidden>
+    <div class="modal-content">
+      <button id="closeLoginBtn" class="modal-close" type="button">×</button>
+      <h2>Portfolio login</h2>
+      <p>Log in to manage and save your portfolio.</p>
+
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="Enter your email">
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter your password">
+
+      <button id="submitLoginBtn" type="button">Log in</button>
+      <p id="loginMessage"></p>
+      <button id="logoutBtn" type="button" hidden>Log out</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p contenteditable="true" class="editable-text">
+      © 2026 My Engineering Portfolio. Designed with purpose.
+    </p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PARTS 3 AND 4: JAVASCRIPT WILL GO HERE -->
+  <script>
+  
+/* =========================================
+   1. GLOBAL VARIABLES AND HELPERS
+========================================= */
+
+const websiteCanvas = document.getElementById("websiteCanvas");
+const designPanel = document.getElementById("designPanel");
+const selectionPanel = document.getElementById("selectionPanel");
+
+let selectedElement = null;
+let isResizing = false;
+let isDragging = false;
+let resizeDirection = "";
+let startX = 0;
+let startY = 0;
+let startWidth = 0;
+let startHeight = 0;
+let startLeft = 0;
+let startTop = 0;
+let aspectRatio = 1;
+
+let elementCounter = 0;
+
+const body = document.body;
+
+function updateSaveStatus(message) {
+  const status = document.getElementById("saveStatus");
+  if (status) status.textContent = message;
 }
-function collectContent(){
- const html={};
- document.querySelectorAll("[data-block]").forEach(el=>html[el.dataset.block]=el.innerHTML);
- const sections=[...document.querySelectorAll("[data-section]")].map(s=>({
-  id:s.id,html:s.innerHTML,layout:s.dataset.layout||"grid",dark:s.classList.contains("dark")
- }));
- return {blocks:html,sections,design:{...design},extraSections:[...document.querySelectorAll("[data-section]")].filter(s=>s.dataset.custom==="true").map(s=>s.id)};
+
+function markChanged() {
+  updateSaveStatus("Unsaved changes");
 }
-function applyContent(saved){
- if(!saved)return;
- if(saved.blocks)Object.entries(saved.blocks).forEach(([key,value])=>{
-  const el=document.querySelector(`[data-block="${CSS.escape(key)}"]`);if(el)el.innerHTML=value;
- });
- if(Array.isArray(saved.sections)){
-  saved.sections.forEach(item=>{
-   let el=document.getElementById(item.id);
-   if(!el&&item.id&&item.html){
-    el=document.createElement("section");el.id=item.id;el.className="section";el.dataset.section="";el.dataset.custom="true";
-    $("content").appendChild(el);
-   }
-   if(el){el.innerHTML=item.html;el.dataset.layout=item.layout||"grid";el.classList.toggle("dark",!!item.dark);}
+
+/* =========================================
+   2. DARK MODE
+========================================= */
+
+// Start in dark mode
+body.classList.add("dark-mode");
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+  body.classList.toggle("dark-mode");
+
+  const button = document.getElementById("themeToggle");
+
+  button.textContent = body.classList.contains("dark-mode")
+    ? "☀"
+    : "☾";
+
+  markChanged();
+});
+
+/* =========================================
+   3. WEBSITE NAVIGATION
+========================================= */
+
+document.querySelectorAll(".nav-tab").forEach(button => {
+  button.addEventListener("click", () => {
+    showSection(button.dataset.section);
   });
- }
- if(saved.design){design={...defaultDesign,...saved.design};applyDesign(design);}
-}
-async function loadSite(){
- const {data,error}=await db.from("site_content").select("content").eq("id",1).maybeSingle();
- if(error){console.error("Load content:",error.message);return;}
- if(data?.content)applyContent(data.content);
-}
-function enableEditing(){
- isOwner=true;document.body.classList.add("editing");$("logoutBtn").classList.remove("hidden");$("loginBtn").classList.add("hidden");
- document.querySelectorAll("[data-block]").forEach(el=>{el.contentEditable="true";el.spellcheck=true;});
-}
-function disableEditing(){
- isOwner=false;document.body.classList.remove("editing");$("logoutBtn").classList.add("hidden");$("loginBtn").classList.remove("hidden");
- document.querySelectorAll("[data-block]").forEach(el=>el.contentEditable="false");
- $("editor-panel").classList.remove("open");
-}
-async function checkSession(){
- const {data}=await db.auth.getSession(),user=data.session?.user;
- if(user&&user.email?.toLowerCase()===OWNER_EMAIL.toLowerCase())enableEditing();
- else if(user){await db.auth.signOut();disableEditing();}
-}
-$("loginBtn").onclick=()=>$("loginModal").classList.add("open");
-$("cancelLogin").onclick=()=>$("loginModal").classList.remove("open");
-$("loginForm").onsubmit=async e=>{
- e.preventDefault();$("loginError").textContent="";
- const {data,error}=await db.auth.signInWithPassword({email:$("adminEmail").value,password:$("adminPassword").value});
- if(error){$("loginError").textContent=error.message;return;}
- if(data.user?.email?.toLowerCase()!==OWNER_EMAIL.toLowerCase()){await db.auth.signOut();$("loginError").textContent="This account is not authorised.";return;}
- $("loginModal").classList.remove("open");enableEditing();
-};
-$("logoutBtn").onclick=async()=>{await db.auth.signOut();disableEditing();await loadSite();};
-async function saveSite(){
- if(!isOwner)return;
- const content=collectContent();
- const {error}=await db.from("site_content").upsert({id:1,content,updated_at:new Date().toISOString()});
- if(error){alert("Could not save: "+error.message);return;}
- alert("Changes saved and published.");
-}
-$("saveBtn").onclick=saveSite;
+});
 
-function selectedSection(){
- const sel=window.getSelection();let node=sel?.anchorNode;
- if(node?.nodeType===3)node=node.parentElement;
- return node?.closest("[data-section]")||document.querySelector("#about");
+document.querySelectorAll("[data-section-link]").forEach(button => {
+  button.addEventListener("click", () => {
+    showSection(button.dataset.sectionLink);
+  });
+});
+
+function showSection(sectionId) {
+  document.querySelectorAll(".page-section").forEach(section => {
+    section.classList.remove("active-section");
+  });
+
+  document.querySelectorAll(".nav-tab").forEach(button => {
+    button.classList.remove("active");
+  });
+
+  const section = document.getElementById(sectionId);
+
+  if (section) {
+    section.classList.add("active-section");
+  }
+
+  const activeButton = document.querySelector(
+    `.nav-tab[data-section="${sectionId}"]`
+  );
+
+  if (activeButton) {
+    activeButton.classList.add("active");
+  }
+
+  clearSelection();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-function insertIntoSection(node){
- const s=selectedSection();let grid=s.querySelector("[data-card-grid]")||s;
- grid.appendChild(node);
+
+/* =========================================
+   4. OPEN AND CLOSE DESIGN PANEL
+========================================= */
+
+document.getElementById("designBtn").addEventListener("click", () => {
+  designPanel.hidden = !designPanel.hidden;
+});
+
+document.getElementById("closeDesignBtn").addEventListener("click", () => {
+  designPanel.hidden = true;
+});
+
+/* =========================================
+   5. GLOBAL COLOUR CONTROLS
+========================================= */
+
+// Apply colours to the body so they override
+// both light-mode and dark-mode CSS variables.
+
+function setGlobalVariable(variable, value) {
+  body.style.setProperty(variable, value);
 }
-function makeEditable(tag,html){
- const el=document.createElement(tag);el.dataset.block="custom_"+crypto.randomUUID();el.innerHTML=html;el.contentEditable="true";return el;
+
+function updateColours() {
+  setGlobalVariable(
+    "--primary",
+    document.getElementById("primaryColour").value
+  );
+
+  setGlobalVariable(
+    "--accent",
+    document.getElementById("accentColour").value
+  );
+
+  setGlobalVariable(
+    "--background",
+    document.getElementById("backgroundColour").value
+  );
+
+  setGlobalVariable(
+    "--text",
+    document.getElementById("textColour").value
+  );
+
+  markChanged();
 }
-$("addText").onclick=()=>{const el=makeEditable("p","Click to write your new text…");el.className="lead";insertIntoSection(el);el.focus();};
-$("addCard").onclick=()=>{const card=document.createElement("article");card.className="card";card.innerHTML='<h3>New card title</h3><p>Click to edit this card description.</p>';card.querySelector("h3").dataset.block="custom_"+crypto.randomUUID();card.querySelector("p").dataset.block="custom_"+crypto.randomUUID();card.querySelectorAll("[data-block]").forEach(el=>el.contentEditable="true");insertIntoSection(card);};
-$("addShape").onclick=()=>{const shape=document.createElement("span");shape.className="shape";shape.title="Decorative shape";insertIntoSection(shape);};
-$("addSection").onclick=()=>{
- const id="section-"+Date.now(),name="New section";
- const s=document.createElement("section");s.id=id;s.className="section";s.dataset.section="";s.dataset.custom="true";
- s.innerHTML=`<div class="eyebrow">NEW SECTION</div><h2 data-block="${id}-title">New section title</h2><p class="lead" data-block="${id}-text">Click here to add your content.</p>`;
- s.querySelectorAll("[data-block]").forEach(el=>el.contentEditable="true");$("content").appendChild(s);
- const a=document.createElement("a");a.href="#"+id;a.textContent=name.toUpperCase();$("navigation").appendChild(a);
+
+[
+  "primaryColour",
+  "accentColour",
+  "backgroundColour",
+  "textColour"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateColours);
+});
+
+/* =========================================
+   6. THEME PRESETS
+========================================= */
+
+const themePresets = {
+  "navy-gold": {
+    primary: "#101d35",
+    accent: "#d5ad55",
+    background: "#ffffff",
+    text: "#172033"
+  },
+
+  monochrome: {
+    primary: "#222222",
+    accent: "#999999",
+    background: "#ffffff",
+    text: "#222222"
+  },
+
+  forest: {
+    primary: "#173d32",
+    accent: "#b8a36a",
+    background: "#f7f8f3",
+    text: "#172c25"
+  }
 };
-$("designBtn").onclick=()=>{$("editor-panel").classList.add("open");activeSection=selectedSection();syncDesignPanel();};
-$("closeDesign").onclick=()=>$("editor-panel").classList.remove("open");
-function syncDesignPanel(){
- $("accentPick").value=design.accent;$("bgPick").value=design.bg;$("textPick").value=design.text;$("surfacePick").value=design.surface;$("heroPick").value=design.hero;$("siteFont").value=design.font;$("radiusPick").value=design.radius;
- $("brightnessPick").value=design.brightness;$("layoutPick").value=activeSection?.dataset.layout||"grid";
+
+document.getElementById("themePreset").addEventListener("change", event => {
+  const preset = themePresets[event.target.value];
+
+  if (!preset) return;
+
+  document.getElementById("primaryColour").value = preset.primary;
+  document.getElementById("accentColour").value = preset.accent;
+  document.getElementById("backgroundColour").value = preset.background;
+  document.getElementById("textColour").value = preset.text;
+
+  updateColours();
+});
+
+/* =========================================
+   7. GLOBAL FONT SETTINGS
+========================================= */
+
+document.getElementById("fontFamily").addEventListener("change", event => {
+  setGlobalVariable("--font-family", event.target.value);
+  markChanged();
+});
+
+document.getElementById("globalFontSize").addEventListener("input", event => {
+  setGlobalVariable("--global-font-size", event.target.value + "px");
+  markChanged();
+});
+
+/* =========================================
+   8. BACKGROUND IMAGE UPLOAD
+========================================= */
+
+document.getElementById("backgroundUpload").addEventListener("change", event => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("Please select an image file.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    websiteCanvas.style.backgroundImage = `url("${reader.result}")`;
+    websiteCanvas.classList.add("has-background-image");
+    markChanged();
+  };
+
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("removeBackgroundBtn").addEventListener("click", () => {
+  websiteCanvas.style.backgroundImage = "";
+  websiteCanvas.classList.remove("has-background-image");
+  document.getElementById("backgroundUpload").value = "";
+  markChanged();
+});
+
+/* =========================================
+   9. ADD NEW ELEMENTS
+========================================= */
+
+function getActiveSection() {
+  return document.querySelector(".page-section.active-section");
 }
-$("applyDesign").onclick=()=>{
- design={...design,accent:$("accentPick").value,bg:$("bgPick").value,text:$("textPick").value,surface:$("surfacePick").value,hero:$("heroPick").value,font:$("siteFont").value,radius:+$("radiusPick").value,brightness:+$("brightnessPick").value};
- applyDesign();
- if(activeSection){activeSection.dataset.layout=$("layoutPick").value;const cards=activeSection.querySelector(".cards");if(cards){cards.style.gridTemplateColumns=$("layoutPick").value==="list"?"1fr":$("layoutPick").value==="feature"?"repeat(auto-fit,minmax(320px,1fr))":"";}
- activeSection.style.backgroundColor=$("sectionBgPick").value;}
-};
-$("backgroundFile").onchange=async e=>{
- const file=e.target.files[0];if(!file)return;
- if(file.size>5*1024*1024){alert("Choose an image under 5 MB.");return;}
- const ext=file.name.split(".").pop().toLowerCase(),path=`site-background/background-${Date.now()}.${ext}`;
- const {error}=await db.storage.from("site-assets").upload(path,file,{upsert:true,contentType:file.type});
- if(error){alert("Background upload failed: "+error.message+" (check the site-assets bucket and policies).");return;}
- const {data}=db.storage.from("site-assets").getPublicUrl(path);
- design.backgroundPath=path;design.backgroundUrl=data.publicUrl;applyDesign();
-};
-["bold","italic","underline"].forEach(cmd=>document.querySelector(`[data-cmd="${cmd}"]`).onclick=()=>document.execCommand(cmd));
-document.querySelector('[data-cmd="hiliteColor"]').onclick=()=>document.execCommand("hiliteColor",false,"#fff09a");
-$("fontColour").oninput=e=>document.execCommand("foreColor",false,e.target.value);
-$("fontSize").onchange=e=>document.execCommand("fontSize",false,e.target.value);
-$("fontFamily").onchange=e=>document.execCommand("fontName",false,e.target.value);
-$("linkBtn").onclick=()=>{const url=prompt("Enter a URL or a section link such as #projects:");if(url)document.execCommand("createLink",false,url);};
-$("unlinkBtn").onclick=()=>document.execCommand("unlink");
-document.addEventListener("click",e=>{if(isOwner){const s=e.target.closest("[data-section]");if(s)activeSection=s;}});
-db.auth.onAuthStateChange((_event,session)=>{if(!session)disableEditing();});
-(async()=>{await loadSite();await checkSession();})();
-</script>
+
+function createEditableElement(type) {
+  const section = getActiveSection();
+
+  if (!section) return;
+
+  const element = document.createElement("div");
+
+  elementCounter++;
+
+  element.dataset.editorElement = "true";
+  element.dataset.elementId = "element-" + elementCounter;
+
+  element.style.left = "40px";
+  element.style.top = "80px";
+  element.style.width = "220px";
+  element.style.minHeight = "80px";
+  element.style.position = "absolute";
+  element.style.zIndex = "20";
+
+  if (type === "text") {
+    element.className = "custom-text editable-item";
+    element.textContent = "Double-click to edit this text";
+    element.contentEditable = "true";
+    element.style.fontSize = "18px";
+  }
+
+  if (type === "shape") {
+    element.className = "custom-shape editable-item";
+    element.style.width = "140px";
+    element.style.height = "140px";
+  }
+
+  if (type === "card") {
+    element.className = "custom-card editable-item";
+    element.style.width = "250px";
+    element.style.height = "160px";
+
+    element.innerHTML = `
+      <h3 contenteditable="true">New card</h3>
+      <p contenteditable="true">Click here to add your description.</p>
+    `;
+  }
+
+  section.appendChild(element);
+
+  selectElement(element);
+  markChanged();
+}
+
+document.getElementById("addTextBtn").addEventListener("click", () => {
+  createEditableElement("text");
+});
+
+document.getElementById("addCardBtn").addEventListener("click", () => {
+  createEditableElement("card");
+});
+
+document.getElementById("addShapeBtn").addEventListener("click", () => {
+  createEditableElement("shape");
+});
+
+/* =========================================
+   10. ELEMENT SELECTION
+========================================= */
+
+function clearSelection() {
+  if (selectedElement) {
+    selectedElement.classList.remove("editor-selected");
+
+    selectedElement.querySelectorAll(".resize-handle").forEach(handle => {
+      handle.remove();
+    });
+  }
+
+  selectedElement = null;
+  selectionPanel.hidden = true;
+}
+
+function selectElement(element) {
+  if (!element || element.closest(".site-header, .editor-toolbar, .site-footer")) {
+    return;
+  }
+
+  clearSelection();
+
+  selectedElement = element;
+  selectedElement.classList.add("editor-selected");
+
+  selectionPanel.hidden = false;
+
+  addResizeHandles(selectedElement);
+  updateSelectionInputs();
+}
+
+document.addEventListener("click", event => {
+  const element = event.target.closest(
+    ".editable-item, .editable-text, [data-editor-element='true']"
+  );
+
+  if (element && !event.target.closest("button")) {
+    selectElement(element);
+  }
+});
+
+/* =========================================
+   11. RESIZE HANDLES
+========================================= */
+
+function addResizeHandles(element) {
+  const directions = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+
+  directions.forEach(direction => {
+    const handle = document.createElement("div");
+
+    handle.className = "resize-handle " + direction;
+    handle.dataset.direction = direction;
+
+    handle.addEventListener("mousedown", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      startResizing(event, direction);
+    });
+
+    element.appendChild(handle);
+  });
+}
+
+function startResizing(event, direction) {
+  if (!selectedElement) return;
+
+  isResizing = true;
+  resizeDirection = direction;
+
+  startX = event.clientX;
+  startY = event.clientY;
+
+  const rect = selectedElement.getBoundingClientRect();
+
+  startWidth = rect.width;
+  startHeight = rect.height;
+
+  startLeft = selectedElement.offsetLeft;
+  startTop = selectedElement.offsetTop;
+
+  aspectRatio = startWidth / startHeight;
+}
+
+/* =========================================
+   12. DRAGGING ELEMENTS
+========================================= */
+
+document.addEventListener("mousedown", event => {
+  if (!selectedElement) return;
+
+  if (event.target.classList.contains("resize-handle")) return;
+
+  if (event.target.closest("button, input, select, textarea")) return;
+
+  // Only newly created objects are draggable.
+  if (selectedElement.dataset.editorElement !== "true") return;
+
+  if (event.target.isContentEditable) return;
+
+  if (!selectedElement.contains(event.target)) return;
+
+  isDragging = true;
+
+  startX = event.clientX;
+  startY = event.clientY;
+
+  startLeft = selectedElement.offsetLeft;
+  startTop = selectedElement.offsetTop;
+
+  event.preventDefault();
+});
+
+/* =========================================
+   13. MOUSE MOVEMENT AND RESIZING
+========================================= */
+
+document.addEventListener("mousemove", event => {
+  if (isDragging && selectedElement) {
+    const deltaX = event.clientX - startX;
+    const deltaY = event.clientY - startY;
+
+    selectedElement.style.left = Math.max(
+      0,
+      startLeft + deltaX
+    ) + "px";
+
+    selectedElement.style.top = Math.max(
+      0,
+      startTop + deltaY
+    ) + "px";
+  }
+
+  if (isResizing && selectedElement) {
+    const deltaX = event.clientX - startX;
+    const deltaY = event.clientY - startY;
+
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startLeft;
+    let newTop = startTop;
+
+    if (resizeDirection.includes("e")) {
+      newWidth = startWidth + deltaX;
+    }
+
+    if (resizeDirection.includes("w")) {
+      newWidth = startWidth - deltaX;
+      newLeft = startLeft + deltaX;
+    }
+
+    if (resizeDirection.includes("s")) {
+      newHeight = startHeight + deltaY;
+    }
+
+    if (resizeDirection.includes("n")) {
+      newHeight = startHeight - deltaY;
+      newTop = startTop + deltaY;
+    }
+
+    const lockRatio = document.getElementById("lockAspectRatio").checked;
+
+    if (lockRatio) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        newHeight = newWidth / aspectRatio;
+      } else {
+        newWidth = newHeight * aspectRatio;
+      }
+
+      if (resizeDirection.includes("w")) {
+        newLeft = startLeft + startWidth - newWidth;
+      }
+
+      if (resizeDirection.includes("n")) {
+        newTop = startTop + startHeight - newHeight;
+      }
+    }
+
+    newWidth = Math.max(40, newWidth);
+    newHeight = Math.max(30, newHeight);
+
+    selectedElement.style.width = newWidth + "px";
+    selectedElement.style.height = newHeight + "px";
+    selectedElement.style.left = Math.max(0, newLeft) + "px";
+    selectedElement.style.top = Math.max(0, newTop) + "px";
+
+    updateSelectionInputs();
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  if (isDragging || isResizing) {
+    markChanged();
+  }
+
+  isDragging = false;
+  isResizing = false;
+});
+
+/* =========================================
+   14. MANUAL WIDTH AND HEIGHT
+========================================= */
+
+function updateSelectionInputs() {
+  if (!selectedElement) return;
+
+  document.getElementById("objectWidth").value =
+    Math.round(selectedElement.getBoundingClientRect().width);
+
+  document.getElementById("objectHeight").value =
+    Math.round(selectedElement.getBoundingClientRect().height);
+
+  document.getElementById("objectFontSize").value =
+    parseInt(window.getComputedStyle(selectedElement).fontSize) || 16;
+}
+
+document.getElementById("objectWidth").addEventListener("change", event => {
+  if (!selectedElement) return;
+
+  const width = Math.max(40, Number(event.target.value) || 40);
+  selectedElement.style.width = width + "px";
+
+  if (document.getElementById("lockAspectRatio").checked) {
+    selectedElement.style.height = width / aspectRatio + "px";
+  }
+
+  updateSelectionInputs();
+  markChanged();
+});
+
+document.getElementById("objectHeight").addEventListener("change", event => {
+  if (!selectedElement) return;
+
+  const height = Math.max(30, Number(event.target.value) || 30);
+  selectedElement.style.height = height + "px";
+
+  if (document.getElementById("lockAspectRatio").checked) {
+    selectedElement.style.width = height * aspectRatio + "px";
+  }
+
+  updateSelectionInputs();
+  markChanged();
+});
+
+/* =========================================
+   15. MANUAL TEXT SIZE
+========================================= */
+
+document.getElementById("objectFontSize").addEventListener("change", event => {
+  if (!selectedElement) return;
+
+  const size = Math.min(120, Math.max(8, Number(event.target.value) || 16));
+
+  selectedElement.style.fontSize = size + "px";
+  markChanged();
+});
+
+/* =========================================
+   16. DUPLICATE ELEMENT
+========================================= */
+
+document.getElementById("duplicateBtn").addEventListener("click", () => {
+  if (!selectedElement) return;
+
+  const clone = selectedElement.cloneNode(true);
+
+  clone.querySelectorAll(".resize-handle").forEach(handle => {
+    handle.remove();
+  });
+
+  clone.classList.remove("editor-selected");
+
+  elementCounter++;
+  clone.dataset.elementId = "element-" + elementCounter;
+
+  clone.style.left = (selectedElement.offsetLeft + 25) + "px";
+  clone.style.top = (selectedElement.offsetTop + 25) + "px";
+
+  selectedElement.parentElement.appendChild(clone);
+
+  selectElement(clone);
+  markChanged();
+});
+
+/* =========================================
+   17. DELETE ELEMENT
+========================================= */
+
+document.getElementById("deleteBtn").addEventListener("click", () => {
+  if (!selectedElement) return;
+
+  const confirmed = confirm("Are you sure you want to delete this element?");
+
+  if (!confirmed) return;
+
+  selectedElement.remove();
+  selectedElement = null;
+  selectionPanel.hidden = true;
+
+  markChanged();
+});
+
+/* =========================================
+   18. LAYER ORDER
+========================================= */
+
+document.getElementById("bringForwardBtn").addEventListener("click", () => {
+  if (!selectedElement) return;
+
+  const current = parseInt(
+    window.getComputedStyle(selectedElement).zIndex
+  ) || 1;
+
+  selectedElement.style.zIndex = current + 1;
+  markChanged();
+});
+
+document.getElementById("sendBackwardBtn").addEventListener("click", () => {
+  if (!selectedElement) return;
+
+  const current = parseInt(
+    window.getComputedStyle(selectedElement).zIndex
+  ) || 1;
+
+  selectedElement.style.zIndex = Math.max(1, current - 1);
+  markChanged();
+});
+
+/* =========================================
+   19. TRACK TEXT CHANGES
+========================================= */
+
+document.addEventListener("input", event => {
+  if (
+    event.target.isContentEditable ||
+    event.target.matches("input, textarea")
+  ) {
+    markChanged();
+  }
+});
+
+/* =========================================
+   20. INITIAL SETUP
+========================================= */
+
+updateSaveStatus("Ready to edit");
+
+console.log("Portfolio editor loaded successfully.");
+
+/* =========================================
+   PART 4
+   1. SUPABASE CONNECTION
+========================================= */
+
+// Replace these two values with your own Supabase details.
+
+const SUPABASE_URL = "https://hpate18.github.io/";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Sul7wobHWlqCl0x7tT4YUw_V3afz6Wx";
+
+let supabaseClient = null;
+let currentUser = null;
+
+if (
+  window.supabase &&
+  SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL" &&
+  SUPABASE_PUBLISHABLE_KEY !== "YOUR_SUPABASE_PUBLISHABLE_KEY"
+) {
+  supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+} else {
+  console.warn("Add your Supabase URL and publishable key to enable saving.");
+}
+
+/* =========================================
+   2. PORTFOLIO DATA
+========================================= */
+
+function getPortfolioData() {
+  const canvasCopy = websiteCanvas.cloneNode(true);
+
+  // Remove editor-only controls before saving.
+  canvasCopy.querySelectorAll(".resize-handle").forEach(handle => {
+    handle.remove();
+  });
+
+  canvasCopy.querySelectorAll(".editor-selected").forEach(element => {
+    element.classList.remove("editor-selected");
+  });
+
+  const controls = {
+    primaryColour: document.getElementById("primaryColour").value,
+    accentColour: document.getElementById("accentColour").value,
+    backgroundColour: document.getElementById("backgroundColour").value,
+    textColour: document.getElementById("textColour").value,
+    themePreset: document.getElementById("themePreset").value,
+    fontFamily: document.getElementById("fontFamily").value,
+    globalFontSize: document.getElementById("globalFontSize").value,
+    darkMode: body.classList.contains("dark-mode")
+  };
+
+  return {
+    canvasHTML: canvasCopy.innerHTML,
+    canvasStyle: websiteCanvas.getAttribute("style") || "",
+    bodyStyle: body.getAttribute("style") || "",
+    controls: controls,
+    savedAt: new Date().toISOString()
+  };
+}
+
+/* =========================================
+   3. RESTORE PORTFOLIO DATA
+========================================= */
+
+function loadPortfolioData(data) {
+  if (!data) return;
+
+  if (data.canvasHTML) {
+    websiteCanvas.innerHTML = data.canvasHTML;
+  }
+
+  websiteCanvas.setAttribute("style", data.canvasStyle || "");
+  body.setAttribute("style", data.bodyStyle || "");
+
+  if (data.controls) {
+    const controls = data.controls;
+
+    document.getElementById("primaryColour").value =
+      controls.primaryColour || "#101d35";
+
+    document.getElementById("accentColour").value =
+      controls.accentColour || "#d5ad55";
+
+    document.getElementById("backgroundColour").value =
+      controls.backgroundColour || "#ffffff";
+
+    document.getElementById("textColour").value =
+      controls.textColour || "#172033";
+
+    document.getElementById("themePreset").value =
+      controls.themePreset || "navy-gold";
+
+    document.getElementById("fontFamily").value =
+      controls.fontFamily || "Arial";
+
+    document.getElementById("globalFontSize").value =
+      controls.globalFontSize || "16";
+
+    body.classList.toggle("dark-mode", !!controls.darkMode);
+
+    document.getElementById("themeToggle").textContent =
+      controls.darkMode ? "☀" : "☾";
+  }
+
+  clearSelection();
+  markChanged();
+}
+
+/* =========================================
+   4. SUPABASE LOGIN
+========================================= */
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  document.getElementById("loginModal").hidden = false;
+});
+
+document.getElementById("closeLoginBtn").addEventListener("click", () => {
+  document.getElementById("loginModal").hidden = true;
+});
+
+document.getElementById("submitLoginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const message = document.getElementById("loginMessage");
+
+  if (!email || !password) {
+    message.textContent = "Please enter your email and password.";
+    return;
+  }
+
+  if (!supabaseClient) {
+    message.textContent = "Supabase has not been configured yet.";
+    return;
+  }
+
+  message.textContent = "Logging in...";
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  currentUser = data.user;
+
+  message.textContent = "Login successful!";
+  document.getElementById("loginModal").hidden = true;
+  document.getElementById("logoutBtn").hidden = false;
+  document.getElementById("loginBtn").textContent = "Logged in";
+
+  await loadSavedPortfolio();
+});
+
+/* =========================================
+   5. LOGOUT
+========================================= */
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  if (!supabaseClient) return;
+
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  currentUser = null;
+
+  document.getElementById("logoutBtn").hidden = true;
+  document.getElementById("loginBtn").textContent = "Log in";
+
+  updateSaveStatus("Logged out");
+});
+
+/* =========================================
+   6. CHECK EXISTING LOGIN
+========================================= */
+
+async function checkExistingLogin() {
+  if (!supabaseClient) return;
+
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  currentUser = data.session?.user || null;
+
+  if (currentUser) {
+    document.getElementById("logoutBtn").hidden = false;
+    document.getElementById("loginBtn").textContent = "Logged in";
+
+    await loadSavedPortfolio();
+  }
+}
+
+/* =========================================
+   7. SAVE PORTFOLIO
+========================================= */
+
+async function savePortfolio() {
+  if (!supabaseClient) {
+    alert("Please configure Supabase before saving.");
+    return;
+  }
+
+  if (!currentUser) {
+    alert("Please log in before saving your portfolio.");
+    document.getElementById("loginModal").hidden = false;
+    return;
+  }
+
+  updateSaveStatus("Saving...");
+
+  const portfolioData = getPortfolioData();
+
+  const { error } = await supabaseClient
+    .from("portfolio_sites")
+    .upsert({
+      user_id: currentUser.id,
+      content: portfolioData,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: "user_id"
+    });
+
+  if (error) {
+    console.error(error);
+    updateSaveStatus("Save failed");
+    alert("Could not save your portfolio: " + error.message);
+    return;
+  }
+
+  updateSaveStatus("Saved successfully");
+}
+
+document.getElementById("saveBtn").addEventListener("click", savePortfolio);
+
+/* =========================================
+   8. LOAD SAVED PORTFOLIO
+========================================= */
+
+async function loadSavedPortfolio() {
+  if (!supabaseClient || !currentUser) return;
+
+  updateSaveStatus("Loading saved portfolio...");
+
+  const { data, error } = await supabaseClient
+    .from("portfolio_sites")
+    .select("content")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    updateSaveStatus("Could not load portfolio");
+    return;
+  }
+
+  if (data && data.content) {
+    loadPortfolioData(data.content);
+    createHistorySnapshot();
+    updateSaveStatus("Saved portfolio loaded");
+  } else {
+    updateSaveStatus("New portfolio - not saved yet");
+  }
+}
+
+/* =========================================
+   9. PUBLISH PORTFOLIO STATUS
+========================================= */
+
+document.getElementById("publishBtn").addEventListener("click", async () => {
+  if (!supabaseClient) {
+    alert("Please configure Supabase first.");
+    return;
+  }
+
+  if (!currentUser) {
+    alert("Please log in before publishing.");
+    document.getElementById("loginModal").hidden = false;
+    return;
+  }
+
+  const portfolioData = getPortfolioData();
+
+  updateSaveStatus("Publishing...");
+
+  const { error } = await supabaseClient
+    .from("portfolio_sites")
+    .upsert({
+      user_id: currentUser.id,
+      content: portfolioData,
+      is_published: true,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: "user_id"
+    });
+
+  if (error) {
+    updateSaveStatus("Publishing failed");
+    alert(error.message);
+    return;
+  }
+
+  updateSaveStatus("Published status saved");
+
+  alert(
+    "Your portfolio has been marked as published in Supabase. " +
+    "A public website page and hosting are still needed for visitors to view it."
+  );
+});
+
+/* =========================================
+   10. UNDO AND REDO HISTORY
+========================================= */
+
+let history = [];
+let historyIndex = -1;
+let historyTimer = null;
+let restoringHistory = false;
+
+function createHistorySnapshot() {
+  if (restoringHistory) return;
+
+  const snapshot = {
+    data: getPortfolioData(),
+    section: document.querySelector(".page-section.active-section")?.id || "home"
+  };
+
+  // Don't add identical snapshots.
+  const previous = history[historyIndex];
+
+  if (previous && JSON.stringify(previous) === JSON.stringify(snapshot)) {
+    return;
+  }
+
+  history = history.slice(0, historyIndex + 1);
+  history.push(snapshot);
+
+  // Keep the latest 50 editing states.
+  if (history.length > 50) {
+    history.shift();
+  }
+
+  historyIndex = history.length - 1;
+}
+
+function scheduleHistorySnapshot() {
+  if (restoringHistory) return;
+
+  clearTimeout(historyTimer);
+
+  historyTimer = setTimeout(() => {
+    createHistorySnapshot();
+  }, 500);
+}
+
+function restoreHistorySnapshot(index) {
+  if (index < 0 || index >= history.length) return;
+
+  restoringHistory = true;
+
+  const snapshot = history[index];
+
+  loadPortfolioData(snapshot.data);
+
+  showSection(snapshot.section);
+
+  historyIndex = index;
+
+  restoringHistory = false;
+
+  updateSaveStatus("History restored - remember to save");
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    restoreHistorySnapshot(historyIndex - 1);
+  }
+}
+
+function redo() {
+  if (historyIndex < history.length - 1) {
+    restoreHistorySnapshot(historyIndex + 1);
+  }
+}
+
+/* =========================================
+   11. KEYBOARD SHORTCUTS
+========================================= */
+
+document.addEventListener("keydown", event => {
+  const key = event.key.toLowerCase();
+  const modifier = event.ctrlKey || event.metaKey;
+
+  if (modifier && key === "z" && !event.shiftKey) {
+    event.preventDefault();
+    undo();
+  }
+
+  if (
+    modifier &&
+    (key === "y" || (key === "z" && event.shiftKey))
+  ) {
+    event.preventDefault();
+    redo();
+  }
+
+  if (event.key === "Escape") {
+    clearSelection();
+    designPanel.hidden = true;
+  }
+});
+
+/* =========================================
+   12. AUTOMATIC HISTORY TRACKING
+========================================= */
+
+document.addEventListener("input", event => {
+  if (
+    event.target.closest("#websiteCanvas") ||
+    event.target.matches(
+      "#primaryColour, #accentColour, #backgroundColour, " +
+      "#textColour, #fontFamily, #globalFontSize"
+    )
+  ) {
+    scheduleHistorySnapshot();
+  }
+});
+
+document.addEventListener("click", event => {
+  if (
+    event.target.closest("#websiteCanvas") ||
+    event.target.closest(".toolbar-right") ||
+    event.target.closest("#selectionPanel")
+  ) {
+    scheduleHistorySnapshot();
+  }
+});
+
+// Capture dragging and resizing when the mouse is released.
+document.addEventListener("mouseup", () => {
+  if (!restoringHistory) {
+    scheduleHistorySnapshot();
+  }
+});
+
+/* =========================================
+   13. INITIALISE HISTORY AND AUTHENTICATION
+========================================= */
+
+createHistorySnapshot();
+
+checkExistingLogin();
+
+console.log("Portfolio editor and Supabase features initialised.");
+
+  </script>
+
 </body>
 </html>
