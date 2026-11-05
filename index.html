@@ -208,6 +208,12 @@ body.editing [data-edit] {
     <a href="#contact">CONTACT</a>
   </div>
   <button onclick="login()">Admin Login</button>
+
+<button id="appearance-button"
+onclick="openAppearance()"
+style="display:none">
+🎨 Appearance
+</button>
 </nav>
 
 <div id="editor">
@@ -347,6 +353,7 @@ function enableEditing() {
   isOwner = true;
   document.body.classList.add("editing");
   document.getElementById("editor").style.display = "flex";
+  document.getElementById("appearance-button").style.display = "inline-block";
 
   document.querySelectorAll("[data-edit]").forEach(el => {
     el.contentEditable = "true";
