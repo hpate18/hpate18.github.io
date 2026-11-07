@@ -4,1500 +4,461 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Portfolio</title>
-
+<title>Heli Patel | Engineering Portfolio</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --lilac: #B9A5D8;
-  --pink: #F4DCE8;
-  --gold: #D6B66D;
-  --grey: #85818C;
-  --bg: #F9F6FA;
-  --surface: #FFFFFF;
-  --surface2: #F1EAF5;
-  --text: #625D69;
-  --muted: #85818C;
-  --line: #E5D9EB;
-  --font: Arial, sans-serif;
+  --pink:#f5dce8; --purple:#dcd2f4; --lilac:#eee8fa;
+  --cream:#fffaf5; --gold:#c49b50; --ink:#383044;
+  --panel:#fffdfb; --muted:#776e7e;
 }
-
-body.dark {
-  --bg: #211B2A;
-  --surface: #30283B;
-  --surface2: #40344D;
-  --text: #F5EDF7;
-  --muted: #C2B7C9;
-  --line: #594967;
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif;transition:.25s}
+body.dark{--cream:#211d2a;--panel:#302a3a;--ink:#f8efff;--muted:#c7bbd0;--pink:#594052;--purple:#453b60;--lilac:#393047}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 6%;gap:12px}
+.brand{font-weight:800;letter-spacing:2px;font-size:18px}
+.header-actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:0;border-radius:30px;padding:11px 17px;background:var(--purple);color:var(--ink);font-weight:700}
+.btn.gold{background:var(--gold);color:white}
+.btn.soft{background:var(--panel);border:1px solid #c9b9d8}
+.hero{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:40px 7%}
+.hero-inner{width:min(100%,1050px);display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:center}
+.intro{padding:35px 0}
+.eyebrow{text-transform:uppercase;letter-spacing:4px;color:var(--gold);font-size:12px;font-weight:800}
+h1{font-size:clamp(48px,7vw,86px);line-height:.98;margin:18px 0}
+h1 span{color:#b28cc9}
+.subtitle{font-size:19px;color:var(--muted);line-height:1.7;max-width:450px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{min-height:170px;border-radius:24px;padding:25px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;transition:.2s;box-shadow:0 8px 25px #6a526015}
+.tile:hover{transform:translateY(-5px)}
+.tile:nth-child(1){background:var(--pink)}
+.tile:nth-child(2){background:var(--purple)}
+.tile:nth-child(3){background:var(--lilac)}
+.tile:nth-child(4){background:#f4e8ce}
+body.dark .tile:nth-child(4){background:#66553e}
+.tile .number{font-size:12px;opacity:.7}
+.tile strong{font-size:23px}
+.tile .arrow{font-size:24px;text-align:right}
+section.content-section{padding:65px 7%;scroll-margin-top:20px}
+.section-card{max-width:1000px;margin:auto;background:var(--panel);padding:35px;border-radius:25px;box-shadow:0 10px 35px #0000000b}
+.section-card h2{font-size:34px;margin-top:0}
+.section-card p{line-height:1.8;color:var(--muted)}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.project{background:var(--lilac);padding:22px;border-radius:18px}
+footer{text-align:center;padding:35px;color:var(--muted)}
+#adminBar{display:none;position:sticky;top:0;z-index:10;background:#30263d;color:white;padding:10px 4%;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#adminBar button{border:0;border-radius:20px;padding:9px 13px;margin:2px;background:#eee3fa;color:#30263d;font-weight:700}
+#editor{display:none;position:fixed;inset:0;z-index:30;background:#f8f5fb;color:#30263d;overflow:auto}
+.editor-top{position:sticky;top:0;background:#30263d;color:white;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;z-index:5}
+.editor-top button{border:0;border-radius:18px;padding:9px 13px;margin:2px}
+.editor-layout{display:grid;grid-template-columns:230px 1fr 240px;min-height:calc(100vh - 55px)}
+.toolbox,.properties{padding:16px;background:#eee8f5}
+.toolbox button{display:block;width:100%;margin:7px 0;padding:11px;border:0;border-radius:10px;background:white;text-align:left;color:#30263d}
+.properties label{display:block;font-size:12px;font-weight:bold;margin:13px 0 5px}
+.properties input,.properties textarea,.properties select{width:100%;padding:9px;border:1px solid #d8cde1;border-radius:8px;background:white;color:#30263d}
+.workspace{padding:25px;overflow:auto}
+.canvas{position:relative;min-height:650px;min-width:500px;background:white;border:2px dashed #c9b9d8;border-radius:15px;overflow:hidden}
+.canvas-item{position:absolute;min-width:55px;min-height:35px;padding:8px;cursor:move;touch-action:none;user-select:none}
+.canvas-item.selected{outline:2px solid #a47ac4}
+.canvas-item img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.canvas-item.shape{background:#e7d8f5;border:2px solid #b99bd0}
+.canvas-item.line{height:3px!important;min-height:3px;background:#b28cc9;padding:0}
+.resize-handle{display:none;position:absolute;width:12px;height:12px;right:-6px;bottom:-6px;background:#a47ac4;border:2px solid white;border-radius:50%;cursor:nwse-resize}
+.canvas-item.selected .resize-handle{display:block}
+.modal-backdrop{display:none;position:fixed;inset:0;background:#21182c99;z-index:50;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--panel);color:var(--ink);padding:28px;border-radius:20px;width:min(100%,380px)}
+.modal input{width:100%;padding:12px;margin:8px 0;border:1px solid #cbbdd6;border-radius:9px}
+#status{font-size:13px;color:var(--muted)}
+@media(max-width:760px){
+ .hero-inner{grid-template-columns:1fr}.hero{padding-top:15px}
+ .intro{text-align:center}.subtitle{margin:auto}
+ .editor-layout{grid-template-columns:1fr}
+ .toolbox,.properties{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .toolbox h3,.properties h3{grid-column:1/-1}
+ .toolbox button{margin:2px}
+ .workspace{padding:10px}
 }
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  transition: background .25s, color .25s;
-}
-
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-
-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-}
-
-.header-inner {
-  max-width: 1200px;
-  margin: auto;
-  padding: 14px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-}
-
-.brand {
-  color: var(--lilac);
-  font-weight: 800;
-  letter-spacing: 3px;
-  font-size: 13px;
-}
-
-nav {
-  display: flex;
-  gap: 8px;
-}
-
-nav a {
-  width: 72px;
-  height: 43px;
-  display: grid;
-  place-items: center;
-  text-decoration: none;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  transition: .2s;
-}
-
-nav a:hover, nav a.active {
-  background: var(--pink);
-  color: #66536F;
-  border-color: var(--lilac);
-}
-
-button {
-  border: 1px solid var(--line);
-  background: var(--surface2);
-  color: var(--text);
-  padding: 9px 13px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-button.primary {
-  background: var(--gold);
-  color: #51452F;
-  border-color: var(--gold);
-}
-
-button:hover { filter: brightness(.97); }
-
-main {
-  max-width: 1200px;
-  margin: auto;
-  padding: 30px 24px 70px;
-}
-
-.hero {
-  min-height: 390px;
-  display: flex;
-  align-items: center;
-  padding: 60px;
-  border-radius: 25px;
-  background: linear-gradient(125deg, #D9C9E9, #F4DCE8);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero:after {
-  content: "";
-  position: absolute;
-  width: 270px;
-  height: 270px;
-  border: 1px solid white;
-  border-radius: 50%;
-  right: -70px;
-  bottom: -130px;
-  box-shadow: 0 0 0 35px #ffffff20, 0 0 0 70px #ffffff15;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 700px;
-}
-
-.eyebrow, .kicker {
-  color: #9277B0;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-h1 {
-  font-size: clamp(42px, 7vw, 82px);
-  line-height: 1.02;
-  color: #5E5369;
-  margin: 18px 0;
-  letter-spacing: -3px;
-}
-
-.hero p {
-  color: #716A78;
-  line-height: 1.8;
-  max-width: 600px;
-}
-
-.hero button { margin-top: 15px; }
-
-.section {
-  padding: 65px 0 10px;
-  scroll-margin-top: 90px;
-}
-
-.section-heading {
-  margin-bottom: 24px;
-}
-
-h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  color: var(--text);
-  margin: 8px 0;
-}
-
-.section-intro {
-  color: var(--muted);
-  line-height: 1.7;
-  max-width: 650px;
-}
-
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 17px;
-}
-
-.project-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 24px;
-  min-height: 210px;
-  transition: .2s;
-}
-
-.project-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--lilac);
-}
-
-.project-number {
-  color: #A58BC6;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 2px;
-}
-
-.project-card h3 { margin-top: 20px; }
-
-.project-card p {
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.tag {
-  display: inline-block;
-  background: #FBF5E9;
-  color: #9B7C45;
-  border: 1px solid #E8D9B8;
-  border-radius: 30px;
-  padding: 6px 11px;
-  font-size: 11px;
-}
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 1.2fr .8fr;
-  gap: 18px;
-}
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 25px;
-}
-
-.panel p {
-  color: var(--muted);
-  line-height: 1.8;
-}
-
-.skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.skill {
-  padding: 9px 12px;
-  background: var(--surface2);
-  border-radius: 9px;
-  font-size: 12px;
-}
-
-.contact-panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.contact-panel p { color: var(--muted); }
-
-footer {
-  text-align: center;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  padding: 25px;
-  font-size: 12px;
-}
-
-/* EDITOR */
-
-#editorBar {
-  position: sticky;
-  top: 72px;
-  z-index: 15;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  padding: 12px;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-
-#editorBar .spacer { flex: 1; }
-
-#editorBar small {
-  color: var(--muted);
-}
-
-.editor-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 18px;
-  align-items: start;
-}
-
-#websiteCanvas { min-width: 0; }
-
-.inspector {
-  position: sticky;
-  top: 140px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  padding: 16px;
-}
-
-.inspector h3 { margin-top: 0; }
-
-.field {
-  margin: 12px 0;
-  display: grid;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: bold;
-}
-
-.field input, .field select {
-  width: 100%;
-  padding: 9px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.field input[type=color] {
-  height: 40px;
-  padding: 3px;
-}
-
-.field-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.inspector-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-}
-
-.checkline {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  color: var(--muted);
-  margin: 12px 0;
-}
-
-.editor-object {
-  position: relative;
-  outline: 1px dashed transparent;
-}
-
-body.editing .editor-object:hover {
-  outline: 1px dashed var(--lilac);
-}
-
-body.editing .editor-object.selected {
-  outline: 2px solid var(--gold);
-}
-
-.resize-handle {
-  display: none;
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  background: var(--gold);
-  border: 2px solid var(--bg);
-  border-radius: 50%;
-  z-index: 10;
-}
-
-body.editing .selected .resize-handle { display: block; }
-
-.handle-nw { left:-6px;top:-6px;cursor:nwse-resize; }
-.handle-n { left:calc(50% - 5px);top:-6px;cursor:ns-resize; }
-.handle-ne { right:-6px;top:-6px;cursor:nesw-resize; }
-.handle-e { right:-6px;top:calc(50% - 5px);cursor:ew-resize; }
-.handle-se { right:-6px;bottom:-6px;cursor:nwse-resize; }
-.handle-s { left:calc(50% - 5px);bottom:-6px;cursor:ns-resize; }
-.handle-sw { left:-6px;bottom:-6px;cursor:nesw-resize; }
-.handle-w { left:-6px;top:calc(50% - 5px);cursor:ew-resize; }
-
-.custom-object {
-  position: absolute;
-  min-width: 60px;
-  min-height: 35px;
-  padding: 12px;
-  border: 1px dashed var(--lilac);
-  border-radius: 8px;
-  z-index: 4;
-}
-
-.custom-object.shape {
-  background: #B9A5D833;
-  border: 2px solid var(--lilac);
-}
-
-.custom-object.textbox { background: var(--surface2); }
-
-.hidden { display: none !important; }
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: #211B2ACC;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-}
-
-.modal {
-  width: min(440px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 24px;
-}
-
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--gold);
-  color: #51452F;
-  padding: 12px 17px;
-  border-radius: 10px;
-  z-index: 80;
-  opacity: 0;
-  pointer-events: none;
-  transition: .2s;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-#toast.show { opacity: 1; }
-
-@media(max-width:850px) {
-  .editor-layout { grid-template-columns: 1fr; }
-  .inspector { position: static; }
-  .project-grid { grid-template-columns: repeat(2,1fr); }
-}
-
-@media(max-width:600px) {
-  .header-inner { flex-wrap: wrap; justify-content: center; }
-  .brand { display: none; }
-  nav a { width: 62px; height: 40px; font-size: 10px; }
-  main { padding: 20px 14px 50px; }
-  .hero { padding: 28px; min-height: 340px; }
-  .project-grid, .about-grid { grid-template-columns: 1fr; }
-  .editor-layout { display: block; }
-}
+@media(max-width:430px){header{padding:15px 4%}.brand{font-size:14px}.tile{min-height:135px;padding:17px}.tile strong{font-size:19px}.tiles{gap:9px}}
 </style>
 </head>
-
 <body>
-
 <header>
-  <div class="header-inner">
-    <div class="brand">PORTFOLIO / STUDIO</div>
-
-    <nav>
-      <a class="active" href="#home">Home</a>
-      <a href="#projects">Projects</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </nav>
-
-    <div>
-      <button id="themeToggle">☼ Theme</button>
-      <button class="primary" id="editToggle">Edit website</button>
-    </div>
+  <div class="brand">HELI PATEL <span style="color:var(--gold)">✳</span></div>
+  <div class="header-actions">
+    <button class="btn soft" id="themeButton">☾ Theme</button>
+    <button class="btn soft" id="loginButton">Admin login</button>
   </div>
 </header>
 
+<div id="adminBar">
+  <strong>✦ Admin mode</strong>
+  <div>
+    <button id="openEditor">Open visual editor</button>
+    <button id="logoutButton">Log out</button>
+  </div>
+</div>
+
 <main>
-
-<div id="editorBar" class="hidden">
-  <button class="primary" id="addText">+ Text</button>
-  <button id="addShape">+ Shape</button>
-  <button id="addCard">+ Card</button>
-  <button id="addSection">+ Section</button>
-  <button id="designBtn">Design</button>
-  <span class="spacer"></span>
-  <button id="undoBtn">↶ Undo</button>
-  <button id="redoBtn">↷ Redo</button>
-  <button id="loginBtn">Supabase login</button>
-  <button id="saveBtn">Save</button>
-  <button class="primary" id="exportBtn">Export</button>
-  <small id="status">Ready</small>
-</div>
-
-<div id="designPanel" class="panel hidden">
-  <h3>Website design</h3>
-
-  <div class="field-row">
-    <div class="field">
-      <label>Lilac</label>
-      <input type="color" id="lilacColour" value="#B9A5D8">
-    </div>
-    <div class="field">
-      <label>Pastel pink</label>
-      <input type="color" id="pinkColour" value="#F4DCE8">
-    </div>
-    <div class="field">
-      <label>Gold</label>
-      <input type="color" id="goldColour" value="#D6B66D">
-    </div>
-    <div class="field">
-      <label>Grey font</label>
-      <input type="color" id="greyColour" value="#85818C">
-    </div>
+<section class="hero" id="home">
+ <div class="hero-inner">
+  <div class="intro">
+   <div class="eyebrow">Engineering portfolio</div>
+   <h1>Heli<br><span>Patel.</span></h1>
+   <p class="subtitle">An aspiring engineer, curious thinker and creative problem solver. Welcome to my portfolio — a space for my ideas, projects and progress.</p>
+   <a href="#projects"><button class="btn gold">Explore my work ↗</button></a>
   </div>
-
-  <div class="field-row">
-    <div class="field">
-      <label>Font family</label>
-      <select id="fontFamily">
-        <option value="Arial,sans-serif">Modern sans</option>
-        <option value="Georgia,serif">Georgia</option>
-        <option value="'Trebuchet MS',sans-serif">Trebuchet</option>
-        <option value="'Courier New',monospace">Monospace</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Font size</label>
-      <input type="number" id="baseFont" value="16" min="12" max="24">
-    </div>
-  </div>
-
-  <div class="field">
-    <label>Upload background image</label>
-    <input type="file" id="backgroundUpload" accept="image/*">
-  </div>
-
-  <button id="clearBackground">Remove background</button>
-  <button id="closeDesign">Close</button>
-</div>
-
-<div class="editor-layout">
-
-<div id="websiteCanvas">
-
-<section id="home" class="hero editor-object" data-name="Hero banner">
-  <div class="hero-content">
-    <div class="eyebrow" contenteditable="true">ENGINEERING · CREATIVITY · INNOVATION</div>
-
-    <h1 contenteditable="true">Building ideas<br>into impact.</h1>
-
-    <p contenteditable="true">
-      Welcome to my portfolio. Explore my projects, discover what I'm interested in,
-      and see how I turn curiosity into practical solutions.
-    </p>
-
-    <a href="#projects">
-      <button class="primary">Explore my work →</button>
-    </a>
-  </div>
+  <nav class="tiles" aria-label="Main navigation">
+   <a class="tile" href="#home"><span class="number">01 / WELCOME</span><strong>Home</strong><span class="arrow">↗</span></a>
+   <a class="tile" href="#about"><span class="number">02 / MY STORY</span><strong>About</strong><span class="arrow">↗</span></a>
+   <a class="tile" href="#projects"><span class="number">03 / WHAT I DO</span><strong>Projects</strong><span class="arrow">↗</span></a>
+   <a class="tile" href="#contact"><span class="number">04 / SAY HELLO</span><strong>Contact</strong><span class="arrow">↗</span></a>
+  </nav>
+ </div>
 </section>
 
-<section id="projects" class="section editor-object" data-name="Projects section">
-  <div class="section-heading">
-    <div class="kicker" contenteditable="true">SELECTED WORK</div>
-    <h2 contenteditable="true">Featured projects</h2>
-    <p class="section-intro" contenteditable="true">
-      A selection of projects that reflect my interests in technology,
-      engineering, problem-solving and design.
-    </p>
-  </div>
+<section class="content-section" id="about">
+ <div class="section-card">
+  <div class="eyebrow">A little about me</div>
+  <h2>Curiosity meets creativity.</h2>
+  <p>I'm Heli, an aspiring engineer interested in understanding how things work and how thoughtful design can solve real-world problems. This portfolio will grow with my experiences, skills and projects.</p>
+  <p>My interests include engineering, technology, problem solving and innovation. More about me coming soon.</p>
+ </div>
+</section>
 
+<section class="content-section" id="projects">
+ <div class="section-card">
+  <div class="eyebrow">Selected work</div>
+  <h2>Projects & ideas.</h2>
   <div class="project-grid">
-
-    <article class="project-card editor-object" data-name="Project card">
-      <div class="project-number">01 / ENGINEERING</div>
-      <h3 contenteditable="true">Smart T.R.A.C.S.</h3>
-      <p contenteditable="true">
-        An AI-powered traffic management concept designed to improve
-        road safety, efficiency and traffic flow.
-      </p>
-      <span class="tag" contenteditable="true">AI · Innovation</span>
-    </article>
-
-    <article class="project-card editor-object" data-name="Project card">
-      <div class="project-number">02 / RESEARCH</div>
-      <h3 contenteditable="true">Research project</h3>
-      <p contenteditable="true">
-        Add a short explanation of a research project, the question
-        you explored and what you learned.
-      </p>
-      <span class="tag" contenteditable="true">Research</span>
-    </article>
-
-    <article class="project-card editor-object" data-name="Project card">
-      <div class="project-number">03 / DESIGN</div>
-      <h3 contenteditable="true">Design project</h3>
-      <p contenteditable="true">
-        Showcase a design, prototype or practical project and describe
-        the problem it set out to solve.
-      </p>
-      <span class="tag" contenteditable="true">Design · Development</span>
-    </article>
-
+   <article class="project"><h3>Smart T.R.A.C.S.</h3><p>An AI-powered traffic management concept focused on improving road safety and efficiency.</p></article>
+   <article class="project"><h3>Project two</h3><p>A space to showcase another engineering project, including the problem, process and outcome.</p></article>
+   <article class="project"><h3>Project three</h3><p>More experiments, designs and ideas will appear here.</p></article>
   </div>
+ </div>
 </section>
 
-<section id="about" class="section editor-object" data-name="About section">
-  <div class="section-heading">
-    <div class="kicker" contenteditable="true">A LITTLE ABOUT ME</div>
-    <h2 contenteditable="true">Curious by nature.</h2>
-  </div>
-
-  <div class="about-grid">
-    <div class="panel">
-      <p contenteditable="true">
-        I'm interested in how ideas become useful solutions. I enjoy
-        exploring science, technology and engineering, developing new
-        skills, and working collaboratively to tackle challenging problems.
-      </p>
-      <p contenteditable="true">
-        Use this space to introduce yourself, explain what motivates
-        you and describe the direction you would like to take next.
-      </p>
-    </div>
-
-    <div class="panel">
-      <h3 contenteditable="true">Skills & interests</h3>
-      <div class="skills">
-        <span class="skill" contenteditable="true">Problem solving</span>
-        <span class="skill" contenteditable="true">Research</span>
-        <span class="skill" contenteditable="true">Teamwork</span>
-        <span class="skill" contenteditable="true">Engineering</span>
-        <span class="skill" contenteditable="true">Technology</span>
-      </div>
-    </div>
-  </div>
+<section class="content-section" id="contact">
+ <div class="section-card">
+  <div class="eyebrow">Get in touch</div>
+  <h2>Let's connect.</h2>
+  <p>Interested in a project or want to get in touch? Add your preferred contact details here.</p>
+  <p>Email: <span id="contactEmail">your-email@example.com</span></p>
+ </div>
 </section>
-
-<section id="contact" class="section editor-object" data-name="Contact section">
-  <div class="section-heading">
-    <div class="kicker" contenteditable="true">GET IN TOUCH</div>
-    <h2 contenteditable="true">Let's connect.</h2>
-  </div>
-
-  <div class="contact-panel">
-    <div>
-      <h3 contenteditable="true">Have a question or opportunity?</h3>
-      <p contenteditable="true">I'd be happy to hear from you.</p>
-    </div>
-    <a href="mailto:hello@example.com">
-      <button class="primary">Email me ↗</button>
-    </a>
-  </div>
-</section>
-
-</div>
-
-<aside class="inspector hidden" id="inspector">
-  <h3>Object settings</h3>
-
-  <div id="noSelection">
-    <small>Select an object on your website to edit it.</small>
-  </div>
-
-  <div id="selectionControls" class="hidden">
-    <div class="field">
-      <label>Selected object</label>
-      <input id="objectName" readonly>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Width</label>
-        <input type="number" id="objectWidth">
-      </div>
-      <div class="field">
-        <label>Height</label>
-        <input type="number" id="objectHeight">
-      </div>
-      <div class="field">
-        <label>Left</label>
-        <input type="number" id="objectX">
-      </div>
-      <div class="field">
-        <label>Top</label>
-        <input type="number" id="objectY">
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Font size</label>
-        <input type="number" id="objectFont">
-      </div>
-      <div class="field">
-        <label>Rotation</label>
-        <input type="number" id="objectRotation">
-      </div>
-    </div>
-
-    <label class="checkline">
-      <input type="checkbox" id="lockRatio">
-      Lock aspect ratio
-    </label>
-
-    <div class="inspector-actions">
-      <button id="duplicateBtn">Duplicate</button>
-      <button id="frontBtn">Bring forward</button>
-      <button id="backBtn">Send backward</button>
-      <button id="deleteBtn">Delete</button>
-    </div>
-  </div>
-</aside>
-
-</div>
 </main>
+<footer>Designed with curiosity · Heli Patel</footer>
 
-<footer>Personal portfolio · Designed with creativity and purpose.</footer>
-
-<div id="toast"></div>
-
-<div id="loginModal" class="modal-backdrop hidden">
-  <div class="modal">
-    <h2>Supabase login</h2>
-    <p>Connect your Supabase project to enable cloud saving.</p>
-
-    <div class="field">
-      <label>Project URL</label>
-      <input id="supabaseUrl" placeholder="https://your-project.supabase.co">
-    </div>
-
-    <div class="field">
-      <label>Publishable / anon key</label>
-      <input id="supabaseKey" placeholder="Your public key">
-    </div>
-
-    <div class="field">
-      <label>Email</label>
-      <input id="loginEmail" type="email">
-    </div>
-
-    <div class="field">
-      <label>Password</label>
-      <input id="loginPassword" type="password">
-    </div>
-
-    <button id="connectLogin" class="primary">Connect and sign in</button>
-    <button id="closeLogin">Cancel</button>
-    <p id="loginMessage"></p>
-  </div>
+<div class="modal-backdrop" id="loginModal">
+ <div class="modal">
+  <h2>Admin login</h2>
+  <p>Sign in to edit your portfolio.</p>
+  <form id="loginForm">
+   <input id="email" type="email" placeholder="Admin email" required>
+   <input id="password" type="password" placeholder="Password" required>
+   <button class="btn gold" style="width:100%;margin-top:8px" type="submit">Sign in</button>
+  </form>
+  <p id="loginMessage" role="status"></p>
+  <button class="btn soft" id="closeLogin">Cancel</button>
+ </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="editor">
+ <div class="editor-top">
+  <strong>✦ Portfolio visual editor</strong>
+  <div>
+   <button id="undo">↶ Undo</button><button id="redo">↷ Redo</button>
+   <button id="save">Save changes</button><button id="closeEditor">Close editor</button>
+  </div>
+ </div>
+ <div class="editor-layout">
+  <aside class="toolbox">
+   <h3>Insert elements</h3>
+   <button data-add="text">＋ Text box</button>
+   <button data-add="heading">＋ Heading</button>
+   <button data-add="shape">＋ Rectangle</button>
+   <button data-add="circle">＋ Circle</button>
+   <button data-add="line">＋ Line</button>
+   <button data-add="image">＋ Image</button>
+   <input type="file" id="imageFile" accept="image/*" hidden>
+   <h3>Page appearance</h3>
+   <button id="backgroundColour">Change background colour</button>
+   <button id="accentColour">Change accent colour</button>
+   <button id="fontColour">Change text colour</button>
+   <button id="fontSize">Change base font size</button>
+   <button id="toggleBold">Toggle bold</button>
+   <button id="toggleItalic">Toggle italic</button>
+   <button id="backgroundImage">Set background image</button>
+   <input type="file" id="backgroundFile" accept="image/*" hidden>
+  </aside>
+  <section class="workspace">
+   <p><strong>Editing canvas</strong> — select an item to move, resize or change its properties.</p>
+   <div class="canvas" id="canvas"></div>
+   <p id="status">No unsaved changes.</p>
+  </section>
+  <aside class="properties">
+   <h3>Selected element</h3>
+   <label>Text content</label><textarea id="propText" rows="3" placeholder="Select a text element"></textarea>
+   <label>Text / fill colour</label><input id="propColour" type="color" value="#b28cc9">
+   <label>Font size (px)</label><input id="propSize" type="number" min="8" max="120" value="22">
+   <label>Width (px)</label><input id="propWidth" type="number" min="20" value="180">
+   <label>Height (px)</label><input id="propHeight" type="number" min="20" value="70">
+   <label>Background</label><input id="propFill" type="color" value="#eee8fa">
+   <label>Position X</label><input id="propX" type="number" min="0" value="20">
+   <label>Position Y</label><input id="propY" type="number" min="0" value="20">
+   <button class="btn" id="applyProperties" style="margin-top:15px;width:100%">Apply properties</button>
+   <button class="btn" id="duplicate" style="margin-top:8px;width:100%">Duplicate</button>
+   <button class="btn" id="delete" style="margin-top:8px;width:100%">Delete element</button>
+  </aside>
+ </div>
+</div>
 
 <script>
-(() => {
-  const $ = id => document.getElementById(id);
-  const canvas = $('websiteCanvas');
+/* Add your Supabase project details here in the next setup step. */
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const supabaseReady = SUPABASE_URL.startsWith("https://") &&
+  !SUPABASE_ANON_KEY.includes("YOUR_");
+const db = supabaseReady
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
-  let editing = false;
-  let selected = null;
-  let history = [];
-  let historyIndex = -1;
-  let restoring = false;
-  let drag = null;
-  let resize = null;
-  let supabaseClient = null;
-  let currentUser = null;
+const $ = id => document.getElementById(id);
+let currentUser = null, isAdmin = false, selected = null;
+let elements = [], history = [], future = [], dirty = false;
+let pageSettings = {background:"#ffffff",accent:"#b28cc9",text:"#383044",fontSize:16,backgroundImage:""};
+const canvas = $("canvas");
 
-  const handles = ['nw','n','ne','e','se','s','sw','w'];
-
-  function toast(message) {
-    const el = $('toast');
-    el.textContent = message;
-    el.classList.add('show');
-    clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => el.classList.remove('show'), 2400);
+function markDirty(){
+ dirty=true; $("status").textContent="● Unsaved changes";
+}
+function snapshot(){
+ history.push(JSON.stringify({elements,pageSettings}));
+ if(history.length>40)history.shift();
+ future=[];
+}
+function restore(data){
+ const state=JSON.parse(data);
+ elements=state.elements;pageSettings=state.pageSettings;
+ renderCanvas();markDirty();
+}
+function undo(){
+ if(!history.length)return;
+ future.push(JSON.stringify({elements,pageSettings}));
+ restore(history.pop());
+}
+function redo(){
+ if(!future.length)return;
+ history.push(JSON.stringify({elements,pageSettings}));
+ restore(future.pop());
+}
+function makeElement(type){
+ const defaults={
+  text:{text:"Write your text here",width:220,height:70,fontSize:20,colour:"#383044",fill:"#ffffff"},
+  heading:{text:"Your heading",width:280,height:80,fontSize:34,colour:"#383044",fill:"#ffffff",bold:true},
+  shape:{text:"",width:160,height:100,fontSize:18,colour:"#383044",fill:"#eee8fa"},
+  circle:{text:"",width:110,height:110,fontSize:18,colour:"#383044",fill:"#f5dce8"},
+  line:{text:"",width:180,height:4,fontSize:16,colour:"#b28cc9",fill:"#b28cc9"},
+  image:{text:"",width:180,height:130,fontSize:16,colour:"#383044",fill:"#eee8fa"}
+ };
+ return {id:crypto.randomUUID(),type,x:25+elements.length*12,y:25+elements.length*12,...defaults[type]};
+}
+function addElement(type){
+ snapshot();
+ const el=makeElement(type);elements.push(el);selected=el.id;
+ renderCanvas();selectElement(el.id);markDirty();
+}
+function renderCanvas(){
+ canvas.innerHTML="";
+ canvas.style.background=pageSettings.background;
+ if(pageSettings.backgroundImage){
+  canvas.style.backgroundImage=`url("${pageSettings.backgroundImage}")`;
+  canvas.style.backgroundSize="cover";
+ }
+ elements.forEach(el=>{
+  const node=document.createElement("div");
+  node.className="canvas-item"+(el.type==="shape"||el.type==="circle"?" shape":"")+(el.type==="line"?" line":"");
+  node.dataset.id=el.id;
+  Object.assign(node.style,{left:el.x+"px",top:el.y+"px",width:el.width+"px",height:el.height+"px",fontSize:el.fontSize+"px",color:el.colour,background:el.type==="line"?el.fill:(el.type==="image"?"transparent":el.fill),fontWeight:el.bold?"bold":"normal",fontStyle:el.italic?"italic":"normal",borderRadius:el.type==="circle"?"50%":"8px"});
+  if(el.type==="image"&&el.src){
+   const img=document.createElement("img");img.src=el.src;node.appendChild(img);
+  }else if(el.type!=="shape"&&el.type!=="circle"&&el.type!=="line"){
+   node.textContent=el.text;
   }
+  const handle=document.createElement("span");handle.className="resize-handle";node.appendChild(handle);
+  node.addEventListener("pointerdown",e=>startMove(e,el.id));
+  node.addEventListener("click",e=>{e.stopPropagation();selectElement(el.id)});
+  canvas.appendChild(node);
+ });
+}
+function selectElement(id){
+ selected=id;
+ document.querySelectorAll(".canvas-item").forEach(n=>n.classList.toggle("selected",n.dataset.id===id));
+ const el=elements.find(x=>x.id===id);if(!el)return;
+ $("propText").value=el.text||"";
+ $("propColour").value=el.colour||"#383044";
+ $("propSize").value=el.fontSize||18;
+ $("propWidth").value=el.width;$("propHeight").value=el.height;
+ $("propFill").value=el.fill||"#ffffff";
+ $("propX").value=el.x;$("propY").value=el.y;
+}
+function startMove(e,id){
+ if(e.target.classList.contains("resize-handle"))return;
+ e.preventDefault();selectElement(id);
+ const el=elements.find(x=>x.id===id);
+ const startX=e.clientX,startY=e.clientY,oldX=el.x,oldY=el.y;
+ snapshot();
+ const move=ev=>{
+  el.x=Math.max(0,oldX+ev.clientX-startX);
+  el.y=Math.max(0,oldY+ev.clientY-startY);
+  renderCanvas();selectElement(id);
+ };
+ const up=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",up);markDirty()};
+ window.addEventListener("pointermove",move);window.addEventListener("pointerup",up);
+}
+canvas.addEventListener("click",()=>{selected=null;document.querySelectorAll(".canvas-item").forEach(n=>n.classList.remove("selected"))});
 
-  function objects() {
-    return [...canvas.querySelectorAll('.editor-object, .custom-object')];
+$("applyProperties").onclick=()=>{
+ const el=elements.find(x=>x.id===selected);if(!el)return;
+ snapshot();
+ el.text=$("propText").value;el.colour=$("propColour").value;
+ el.fontSize=Number($("propSize").value)||18;
+ el.width=Number($("propWidth").value)||100;el.height=Number($("propHeight").value)||50;
+ el.fill=$("propFill").value;el.x=Number($("propX").value)||0;el.y=Number($("propY").value)||0;
+ renderCanvas();selectElement(el.id);markDirty();
+};
+$("duplicate").onclick=()=>{
+ const el=elements.find(x=>x.id===selected);if(!el)return;
+ snapshot();const copy={...el,id:crypto.randomUUID(),x:el.x+20,y:el.y+20};
+ elements.push(copy);selected=copy.id;renderCanvas();selectElement(copy.id);markDirty();
+};
+$("delete").onclick=()=>{
+ if(!selected)return;snapshot();elements=elements.filter(x=>x.id!==selected);
+ selected=null;renderCanvas();markDirty();
+};
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+ const type=b.dataset.add;
+ if(type==="image"){$("imageFile").click();return}
+ addElement(type);
+});
+$("imageFile").onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ const url=await uploadImage(file);if(!url)return;
+ snapshot();const el=makeElement("image");el.src=url;elements.push(el);
+ selected=el.id;renderCanvas();selectElement(el.id);markDirty();e.target.value="";
+};
+async function uploadImage(file){
+ if(!db){alert("Connect Supabase first, then image uploads will be available.");return null}
+ const name=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"");
+ const {data,error}=await db.storage.from("portfolio-images").upload(name,file);
+ if(error){alert(error.message);return null}
+ return db.storage.from("portfolio-images").getPublicUrl(data.path).data.publicUrl;
+}
+$("backgroundColour").onclick=()=>{
+ const c=prompt("Enter a background colour (e.g. #ffffff):",pageSettings.background);
+ if(c){snapshot();pageSettings.background=c;pageSettings.backgroundImage="";renderCanvas();markDirty()}
+};
+$("accentColour").onclick=()=>{
+ const c=prompt("Enter an accent colour:",pageSettings.accent);
+ if(c){snapshot();pageSettings.accent=c;document.documentElement.style.setProperty("--gold",c);markDirty()}
+};
+$("fontColour").onclick=()=>{
+ const c=prompt("Enter the main text colour:",pageSettings.text);
+ if(c){snapshot();pageSettings.text=c;document.documentElement.style.setProperty("--ink",c);markDirty()}
+};
+$("fontSize").onclick=()=>{
+ const n=Number(prompt("Enter the base font size in pixels:",pageSettings.fontSize));
+ if(n>=8&&n<=40){snapshot();pageSettings.fontSize=n;document.body.style.fontSize=n+"px";markDirty()}
+};
+$("toggleBold").onclick=()=>{
+ const el=elements.find(x=>x.id===selected);if(!el)return;
+ snapshot();el.bold=!el.bold;renderCanvas();selectElement(el.id);markDirty();
+};
+$("toggleItalic").onclick=()=>{
+ const el=elements.find(x=>x.id===selected);if(!el)return;
+ snapshot();el.italic=!el.italic;renderCanvas();selectElement(el.id);markDirty();
+};
+$("backgroundImage").onclick=$("backgroundFile").click.bind($("backgroundFile"));
+$("backgroundFile").onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ const url=await uploadImage(file);if(url){snapshot();pageSettings.backgroundImage=url;renderCanvas();markDirty()}
+};
+$("undo").onclick=undo;$("redo").onclick=redo;
+document.addEventListener("keydown",e=>{
+ if(!$("editor").style.display||$("editor").style.display==="none")return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();undo()}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo()}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="c"){
+  const el=elements.find(x=>x.id===selected);if(el)window._copiedElement={...el};
+ }
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="v"&&window._copiedElement){
+  e.preventDefault();snapshot();const copy={...window._copiedElement,id:crypto.randomUUID(),x:window._copiedElement.x+20,y:window._copiedElement.y+20};
+  elements.push(copy);selected=copy.id;renderCanvas();selectElement(copy.id);markDirty();
+ }
+ if(e.key==="Delete"&&selected)$("delete").click();
+});
+
+async function loadContent(){
+ if(!db)return;
+ const {data,error}=await db.from("site_content").select("content").eq("id",1).maybeSingle();
+ if(!error&&data?.content){
+  elements=data.content.elements||[];
+  pageSettings={...pageSettings,...(data.content.pageSettings||{})};
+  renderCanvas();
+  if(pageSettings.accent)document.documentElement.style.setProperty("--gold",pageSettings.accent);
+ }
+}
+async function saveContent(){
+ if(!db){alert("First connect your Supabase project using the setup instructions.");return}
+ if(!isAdmin){alert("Only an authorised admin can save changes.");return}
+ const {error}=await db.from("site_content").upsert({id:1,content:{elements,pageSettings},updated_at:new Date().toISOString()});
+ if(error){alert("Save failed: "+error.message);return}
+ dirty=false;$("status").textContent="✓ All changes saved.";
+}
+$("save").onclick=saveContent;
+$("loginButton").onclick=()=>$("loginModal").style.display="flex";
+$("closeLogin").onclick=()=>$("loginModal").style.display="none";
+$("loginForm").onsubmit=async e=>{
+ e.preventDefault();
+ if(!db){$("loginMessage").textContent="Supabase is not connected yet. Follow the setup step first.";return}
+ const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+ if(error){$("loginMessage").textContent=error.message;return}
+ currentUser=data.user;
+ const {data:admin,error:adminError}=await db.from("site_admins").select("user_id").eq("user_id",currentUser.id).maybeSingle();
+ if(adminError||!admin){
+  await db.auth.signOut();$("loginMessage").textContent="This account is not authorised as an admin.";return;
+ }
+ isAdmin=true;$("loginModal").style.display="none";
+ $("adminBar").style.display="flex";$("loginButton").style.display="none";
+ await loadContent();
+};
+$("logoutButton").onclick=async()=>{
+ if(db)await db.auth.signOut();
+ currentUser=null;isAdmin=false;$("adminBar").style.display="none";$("loginButton").style.display="inline-block";
+ $("editor").style.display="none";
+};
+$("openEditor").onclick=()=>{
+ if(!isAdmin)return;
+ $("editor").style.display="block";renderCanvas();
+};
+$("closeEditor").onclick=()=>{
+ if(dirty&&!confirm("You have unsaved changes. Close without saving?"))return;
+ $("editor").style.display="none";
+};
+$("themeButton").onclick=()=>{
+ document.body.classList.toggle("dark");
+ $("themeButton").textContent=document.body.classList.contains("dark")?"☀ Light":"☾ Theme";
+};
+if(db){
+ db.auth.getSession().then(async({data})=>{
+  if(data.session){
+   currentUser=data.session.user;
+   const {data:admin}=await db.from("site_admins").select("user_id").eq("user_id",currentUser.id).maybeSingle();
+   if(admin){isAdmin=true;$("adminBar").style.display="flex";$("loginButton").style.display="none";await loadContent()}
   }
-
-  function addHandles(el) {
-    handles.forEach(position => {
-      if (!el.querySelector('.handle-' + position)) {
-        const handle = document.createElement('span');
-        handle.className = 'resize-handle handle-' + position;
-        handle.dataset.handle = position;
-        el.appendChild(handle);
-      }
-    });
-  }
-
-  function setEditing(on) {
-    editing = on;
-    document.body.classList.toggle('editing', on);
-    $('editorBar').classList.toggle('hidden', !on);
-    $('inspector').classList.toggle('hidden', !on);
-    $('editToggle').textContent = on ? 'Finish editing' : 'Edit website';
-
-    if (on) {
-      objects().forEach(addHandles);
-      snapshot();
-    } else {
-      deselect();
-    }
-  }
-
-  $('editToggle').onclick = () => setEditing(!editing);
-
-  function deselect() {
-    if (selected) selected.classList.remove('selected');
-    selected = null;
-    $('noSelection').classList.remove('hidden');
-    $('selectionControls').classList.add('hidden');
-  }
-
-  function select(el) {
-    if (!editing || !canvas.contains(el)) return;
-
-    if (selected) selected.classList.remove('selected');
-
-    selected = el;
-    addHandles(el);
-    el.classList.add('selected');
-
-    $('noSelection').classList.add('hidden');
-    $('selectionControls').classList.remove('hidden');
-
-    updateInspector();
-  }
-
-  function updateInspector() {
-    if (!selected) return;
-
-    const rect = selected.getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-
-    $('objectName').value = selected.dataset.name || 'Object';
-    $('objectWidth').value = Math.round(rect.width);
-    $('objectHeight').value = Math.round(rect.height);
-    $('objectX').value = Math.round(rect.left - canvasRect.left);
-    $('objectY').value = Math.round(rect.top - canvasRect.top);
-    $('objectFont').value = parseFloat(getComputedStyle(selected).fontSize) || 16;
-
-    const transform = getComputedStyle(selected).transform;
-    let angle = 0;
-
-    if (transform !== 'none') {
-      const matrix = new DOMMatrix(transform);
-      angle = Math.round(Math.atan2(matrix.b, matrix.a) * 180 / Math.PI);
-    }
-
-    $('objectRotation').value = angle;
-  }
-
-  function applyDimensions() {
-    if (!selected) return;
-
-    selected.style.width = Math.max(30, +$('objectWidth').value || 30) + 'px';
-    selected.style.height = Math.max(25, +$('objectHeight').value || 25) + 'px';
-    selected.style.left = Math.max(0, +$('objectX').value || 0) + 'px';
-    selected.style.top = Math.max(0, +$('objectY').value || 0) + 'px';
-    selected.style.fontSize = Math.max(8, +$('objectFont').value || 16) + 'px';
-    selected.style.transform = 'rotate(' + (+$('objectRotation').value || 0) + 'deg)';
-
-    snapshot();
-    updateInspector();
-  }
-
-  [
-    'objectWidth','objectHeight','objectX',
-    'objectY','objectFont','objectRotation'
-  ].forEach(id => $(id).addEventListener('change', applyDimensions));
-
-  canvas.addEventListener('click', event => {
-    if (!editing) return;
-
-    const object = event.target.closest('.editor-object, .custom-object');
-
-    if (object && canvas.contains(object)) select(object);
-    else if (event.target === canvas) deselect();
-  });
-
-  canvas.addEventListener('pointerdown', event => {
-    if (!editing) return;
-
-    const handle = event.target.closest('.resize-handle');
-    const object = event.target.closest('.editor-object, .custom-object');
-
-    if (!object || !canvas.contains(object)) return;
-
-    select(object);
-
-    if (handle) {
-      event.preventDefault();
-      const rect = object.getBoundingClientRect();
-
-      resize = {
-        object,
-        handle: handle.dataset.handle,
-        x: event.clientX,
-        y: event.clientY,
-        width: rect.width,
-        height: rect.height,
-        left: parseFloat(object.style.left) || 0,
-        top: parseFloat(object.style.top) || 0,
-        ratio: rect.width / rect.height
-      };
-      return;
-    }
-
-    if (event.target.closest('[contenteditable="true"], a, button')) return;
-
-    event.preventDefault();
-
-    drag = {
-      object,
-      x: event.clientX,
-      y: event.clientY,
-      left: parseFloat(object.style.left) || 0,
-      top: parseFloat(object.style.top) || 0
-    };
-  });
-
-  window.addEventListener('pointermove', event => {
-    if (drag) {
-      drag.object.style.left =
-        Math.max(0, drag.left + event.clientX - drag.x) + 'px';
-
-      drag.object.style.top =
-        Math.max(0, drag.top + event.clientY - drag.y) + 'px';
-
-      updateInspector();
-    }
-
-    if (resize) {
-      const s = resize;
-      const dx = event.clientX - s.x;
-      const dy = event.clientY - s.y;
-      const h = s.handle;
-
-      let width = s.width;
-      let height = s.height;
-      let left = s.left;
-      let top = s.top;
-
-      if (h.includes('e')) width = Math.max(40, s.width + dx);
-
-      if (h.includes('w')) {
-        width = Math.max(40, s.width - dx);
-        left = s.left + s.width - width;
-      }
-
-      if (h.includes('s')) height = Math.max(30, s.height + dy);
-
-      if (h.includes('n')) {
-        height = Math.max(30, s.height - dy);
-        top = s.top + s.height - height;
-      }
-
-      if ($('lockRatio').checked) {
-        if (Math.abs(dx) > Math.abs(dy)) height = width / s.ratio;
-        else width = height * s.ratio;
-
-        if (h.includes('w')) left = s.left + s.width - width;
-        if (h.includes('n')) top = s.top + s.height - height;
-      }
-
-      s.object.style.width = width + 'px';
-      s.object.style.height = height + 'px';
-      s.object.style.left = left + 'px';
-      s.object.style.top = top + 'px';
-
-      updateInspector();
-    }
-  });
-
-  window.addEventListener('pointerup', () => {
-    if (drag || resize) {
-      drag = null;
-      resize = null;
-      snapshot();
-    }
-  });
-
-  function createObject(el) {
-    el.classList.add('custom-object', 'editor-object');
-    el.style.left = '50px';
-    el.style.top = '50px';
-    el.style.width = '220px';
-    el.style.height = '100px';
-    el.style.position = 'absolute';
-    el.style.zIndex = objects().length + 10;
-
-    canvas.style.position = 'relative';
-    canvas.appendChild(el);
-
-    addHandles(el);
-    select(el);
-    snapshot();
-  }
-
-  $('addText').onclick = () => {
-    const el = document.createElement('div');
-    el.className = 'textbox';
-    el.contentEditable = 'true';
-    el.textContent = 'Type your text here';
-    el.style.fontSize = '20px';
-    createObject(el);
-  };
-
-  $('addShape').onclick = () => {
-    const el = document.createElement('div');
-    el.className = 'shape';
-    createObject(el);
-  };
-
-  $('addCard').onclick = () => {
-    const el = document.createElement('article');
-    el.className = 'project-card';
-    el.dataset.name = 'New project card';
-    el.innerHTML =
-      '<h3 contenteditable="true">Project title</h3>' +
-      '<p contenteditable="true">Describe your project here.</p>' +
-      '<span class="tag" contenteditable="true">Add a tag</span>';
-
-    createObject(el);
-  };
-
-  $('addSection').onclick = () => {
-    const el = document.createElement('section');
-    el.className = 'panel';
-    el.dataset.name = 'New section';
-    el.innerHTML =
-      '<h2 contenteditable="true">New section</h2>' +
-      '<p contenteditable="true">Add your content here.</p>';
-
-    createObject(el);
-  };
-
-  $('duplicateBtn').onclick = () => {
-    if (!selected) return;
-
-    const clone = selected.cloneNode(true);
-    clone.classList.remove('selected');
-    clone.style.left = ((parseFloat(selected.style.left) || 20) + 25) + 'px';
-    clone.style.top = ((parseFloat(selected.style.top) || 20) + 25) + 'px';
-
-    selected.after(clone);
-    addHandles(clone);
-    select(clone);
-    snapshot();
-  };
-
-  $('deleteBtn').onclick = () => {
-    if (!selected) return;
-    const object = selected;
-    deselect();
-    object.remove();
-    snapshot();
-  };
-
-  $('frontBtn').onclick = () => {
-    if (!selected) return;
-
-    selected.style.zIndex =
-      Math.max(10, ...objects().map(el => +el.style.zIndex || 0)) + 1;
-
-    snapshot();
-  };
-
-  $('backBtn').onclick = () => {
-    if (!selected) return;
-
-    selected.style.zIndex = Math.max(
-      1, (+selected.style.zIndex || 10) - 1
-    );
-
-    snapshot();
-  };
-
-  $('designBtn').onclick = () =>
-    $('designPanel').classList.toggle('hidden');
-
-  $('closeDesign').onclick = () =>
-    $('designPanel').classList.add('hidden');
-
-  $('themeToggle').onclick = () => {
-    document.body.classList.toggle('dark');
-    snapshot();
-  };
-
-  function mix(a, b, amount) {
-    const x = a.match(/[A-Fa-f0-9]{2}/g).map(v => parseInt(v, 16));
-    const y = b.match(/[A-Fa-f0-9]{2}/g).map(v => parseInt(v, 16));
-
-    return '#' + x.map((v, i) =>
-      Math.round(v * (1 - amount) + y[i] * amount)
-        .toString(16).padStart(2, '0')
-    ).join('');
-  }
-
-  function applyPalette() {
-    const root = document.documentElement.style;
-
-    const lilac = $('lilacColour').value;
-    const pink = $('pinkColour').value;
-    const gold = $('goldColour').value;
-    const grey = $('greyColour').value;
-
-    root.setProperty('--lilac', lilac);
-    root.setProperty('--pink', pink);
-    root.setProperty('--gold', gold);
-    root.setProperty('--grey', grey);
-    root.setProperty('--muted', grey);
-    root.setProperty('--text', document.body.classList.contains('dark')
-      ? '#F5EDF7' : mix(grey, '#29242E', .22));
-    root.setProperty('--line', mix(lilac, '#FFFFFF', .55));
-    root.setProperty('--surface2', mix(lilac, '#FFFFFF', .76));
-
-    snapshot();
-  }
-
-  [
-    'lilacColour','pinkColour','goldColour','greyColour'
-  ].forEach(id => $(id).addEventListener('input', applyPalette));
-
-  $('fontFamily').onchange = event => {
-    document.documentElement.style.setProperty('--font', event.target.value);
-    snapshot();
-  };
-
-  $('baseFont').onchange = event => {
-    document.documentElement.style.setProperty(
-      '--base', Math.max(12, Math.min(24, +event.target.value || 16)) + 'px'
-    );
-    document.body.style.fontSize = 'var(--base)';
-    snapshot();
-  };
-
-  $('backgroundUpload').onchange = event => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      canvas.style.backgroundImage =
-        'linear-gradient(#F9F6FA66,#F9F6FA66),url("' + reader.result + '")';
-      canvas.style.backgroundSize = 'cover';
-      canvas.style.backgroundPosition = 'center';
-      snapshot();
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  $('clearBackground').onclick = () => {
-    canvas.style.backgroundImage = '';
-    snapshot();
-  };
-
-  function serialise() {
-    const clone = canvas.cloneNode(true);
-
-    clone.querySelectorAll('.selected').forEach(el =>
-      el.classList.remove('selected')
-    );
-
-    clone.querySelectorAll('.resize-handle').forEach(el => el.remove());
-
-    const root = getComputedStyle(document.documentElement);
-    const vars = {};
-
-    [
-      'lilac','pink','gold','grey','bg','surface',
-      'surface2','text','muted','line','font','base'
-    ].forEach(key => {
-      vars[key] = root.getPropertyValue('--' + key).trim();
-    });
-
-    return JSON.stringify({
-      html: clone.innerHTML,
-      style: canvas.getAttribute('style') || '',
-      dark: document.body.classList.contains('dark'),
-      vars
-    });
-  }
-
-  function snapshot() {
-    if (restoring) return;
-
-    const state = serialise();
-
-    if (history[historyIndex] === state) return;
-
-    history = history.slice(0, historyIndex + 1);
-    history.push(state);
-
-    if (history.length > 50) history.shift();
-
-    historyIndex = history.length - 1;
-    $('status').textContent = 'Unsaved changes';
-  }
-
-  function restore(state) {
-    if (!state) return;
-
-    restoring = true;
-
-    const data = JSON.parse(state);
-
-    canvas.innerHTML = data.html;
-    canvas.setAttribute('style', data.style);
-
-    document.body.classList.toggle('dark', data.dark);
-
-    Object.entries(data.vars || {}).forEach(([key, value]) => {
-      document.documentElement.style.setProperty('--' + key, value);
-    });
-
-    objects().forEach(addHandles);
-    deselect();
-
-    restoring = false;
-  }
-
-  function historyStep(direction) {
-    const next = historyIndex + direction;
-
-    if (next < 0 || next >= history.length) return;
-
-    historyIndex = next;
-    restore(history[historyIndex]);
-    $('status').textContent = 'History restored';
-  }
-
-  $('undoBtn').onclick = () => historyStep(-1);
-  $('redoBtn').onclick = () => historyStep(1);
-
-  document.addEventListener('keydown', event => {
-    const typing =
-      ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName) ||
-      document.activeElement.isContentEditable;
-
-    if ((event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === 'z' && !typing) {
-      event.preventDefault();
-      historyStep(event.shiftKey ? 1 : -1);
-    }
-
-    if ((event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === 'y' && !typing) {
-      event.preventDefault();
-      historyStep(1);
-    }
-
-    if (event.key === 'Escape') deselect();
-  });
-
-  canvas.addEventListener('input', () => {
-    if (editing) snapshot();
-  });
-
-  canvas.addEventListener('focusout', () => {
-    if (editing) snapshot();
-  }, true);
-
-  document.querySelectorAll('nav a').forEach(link => {
-    link.onclick = () => {
-      document.querySelectorAll('nav a').forEach(item =>
-        item.classList.remove('active')
-      );
-
-      link.classList.add('active');
-    };
-  });
-
-  /* LOCAL SAVE */
-
-  function saveLocal() {
-    localStorage.setItem('portfolioStudioData', serialise());
-    $('status').textContent = 'Saved in this browser';
-    toast('Portfolio saved on this device.');
-  }
-
-  $('saveBtn').onclick = async () => {
-    if (supabaseClient && currentUser) await saveCloud();
-    else saveLocal();
-  };
-
-  function loadLocal() {
-    const saved = localStorage.getItem('portfolioStudioData');
-
-    if (saved) restore(saved);
-  }
-
-  /* OPTIONAL SUPABASE CLOUD SAVE */
-
-  $('loginBtn').onclick = () => {
-    if (currentUser && supabaseClient) {
-      supabaseClient.auth.signOut();
-      currentUser = null;
-      $('loginBtn').textContent = 'Supabase login';
-      toast('Signed out.');
-    } else {
-      $('loginModal').classList.remove('hidden');
-    }
-  };
-
-  $('closeLogin').onclick = () =>
-    $('loginModal').classList.add('hidden');
-
-  $('connectLogin').onclick = async () => {
-    const message = $('loginMessage');
-
-    try {
-      if (!window.supabase) {
-        throw new Error('Supabase library could not load. Check your internet connection.');
-      }
-
-      const url = $('supabaseUrl').value.trim();
-      const key = $('supabaseKey').value.trim();
-
-      if (!url || !key) throw new Error('Enter your Supabase URL and key.');
-
-      localStorage.setItem('portfolioSupabaseUrl', url);
-      localStorage.setItem('portfolioSupabaseKey', key);
-
-      supabaseClient = window.supabase.createClient(url, key);
-
-      const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-          email: $('loginEmail').value.trim(),
-          password: $('loginPassword').value
-        });
-
-      if (error) throw error;
-
-      currentUser = data.user;
-
-      $('loginModal').classList.add('hidden');
-      $('loginBtn').textContent = 'Sign out';
-
-      await loadCloud();
-
-      toast('Connected to Supabase.');
-    } catch (error) {
-      message.textContent = error.message;
-    }
-  };
-
-  async function initCloud() {
-    const url = localStorage.getItem('portfolioSupabaseUrl');
-    const key = localStorage.getItem('portfolioSupabaseKey');
-
-    if (!url || !key || !window.supabase) return;
-
-    try {
-      supabaseClient = window.supabase.createClient(url, key);
-
-      const { data } = await supabaseClient.auth.getSession();
-
-      currentUser = data.session?.user || null;
-
-      if (currentUser) {
-        $('loginBtn').textContent = 'Sign out';
-        await loadCloud();
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
-  async function saveCloud() {
-    try {
-      const { error } = await supabaseClient
-        .from('portfolio_sites')
-        .upsert({
-          user_id: currentUser.id,
-          content: JSON.parse(serialise()),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-      if (error) throw error;
-
-      $('status').textContent = 'Saved to Supabase';
-      toast('Cloud save complete.');
-    } catch (error) {
-      toast('Save failed: ' + error.message);
-    }
-  }
-
-  async function loadCloud() {
-    try {
-      const { data, error } = await supabaseClient
-        .from('portfolio_sites')
-        .select('content')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data?.content) {
-        restore(JSON.stringify(data.content));
-        history = [serialise()];
-        historyIndex = 0;
-        $('status').textContent = 'Loaded from Supabase';
-      }
-    } catch (error) {
-      toast('Could not load: ' + error.message);
-    }
-  }
-
-  /* EXPORT A CLEAN WEBSITE FILE */
-
-  $('exportBtn').onclick = () => {
-    const copy = document.documentElement.cloneNode(true);
-
-    copy.querySelector('#editorBar')?.remove();
-    copy.querySelector('#inspector')?.remove();
-    copy.querySelector('#designPanel')?.remove();
-    copy.querySelector('#loginModal')?.remove();
-    copy.querySelector('#toast')?.remove();
-    copy.querySelector('#editToggle')?.remove();
-
-    copy.querySelectorAll('.resize-handle').forEach(el => el.remove());
-
-    copy.querySelectorAll('[contenteditable="true"]').forEach(el => {
-      el.removeAttribute('contenteditable');
-    });
-
-    copy.querySelectorAll('.editor-object').forEach(el => {
-      el.classList.remove('editor-object','selected');
-    });
-
-    const blob = new Blob(
-      ['<!DOCTYPE html>\n' + copy.outerHTML],
-      { type: 'text/html' }
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = 'my-portfolio.html';
-    link.click();
-
-    URL.revokeObjectURL(url);
-
-    toast('Website exported. Upload it to a web host to publish online.');
-  };
-
-  /* START */
-
-  loadLocal();
-  history = [serialise()];
-  historyIndex = 0;
-  initCloud();
-
-})();
+ });
+}
 </script>
-
 </body>
 </html>
