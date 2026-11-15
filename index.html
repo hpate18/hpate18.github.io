@@ -53,13 +53,28 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
 #adminBar{display:none;position:sticky;top:0;z-index:20;background:#30263d;color:white;padding:10px 4vw;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 #adminBar .bar-actions{display:flex;gap:7px;flex-wrap:wrap}
 #adminBar button{border:0;border-radius:20px;padding:9px 13px;background:#eee3fa;color:#30263d;font-weight:750}
-#editor{display:none;background:#f5f1f7;color:#30263d;border-top:1px solid #ded4e6;border-bottom:1px solid #ded4e6}
+#editor{display:none;position:fixed;inset:0;z-index:80;background:#f5f1f7;color:#30263d;overflow:hidden}
 .editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 3vw;background:#fff}
 .editor-top strong{font-size:15px}
 .editor-top .right{display:flex;gap:7px;flex-wrap:wrap}
 .editor-top button,.tool-btn{border:1px solid #ddd1e5;background:#fff;color:#30263d;border-radius:9px;padding:8px 11px;font-weight:700}
 .editor-top button.primary{background:#c5a15b;color:white;border-color:#c5a15b}
-.editor-layout{display:grid;grid-template-columns:230px minmax(320px,1fr) 270px;gap:14px;padding:14px;max-width:1700px;margin:auto;align-items:start}
+.editor-layout{display:grid;grid-template-columns:245px minmax(360px,1fr) 285px;gap:12px;padding:12px;height:calc(100dvh - 64px);max-width:none;margin:0;align-items:stretch;min-height:0}
+.editor-layout>.panel{overflow:auto;max-height:100%;}
+.editor-middle{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.workspace-tabs{display:flex;gap:8px;align-items:center;padding:0 0 10px;flex-wrap:wrap}
+.workspace-tab{border:1px solid #ddd1e5;background:#fff;color:#30263d;border-radius:999px;padding:8px 13px;font-weight:750;font-size:12px}
+.workspace-tab.active{background:#ded5f3;border-color:#bdaedc}
+#sitePreviewMount{display:block;flex:1;min-height:0;overflow:auto;background:#fffaf5;border:1px solid #e4dbe9;border-radius:14px;box-shadow:0 8px 25px #34233d12}
+#sitePreviewMount>.site-header{position:relative}
+#sitePreviewMount>main{min-height:0}
+#sitePreviewMount>footer{padding:28px 20px}
+#sitePreviewMount .site-header{flex-wrap:wrap}
+#sitePreviewMount .hero-inner{width:min(1120px,100%)}
+#sitePreviewMount .page-section{scroll-margin-top:8px}
+#canvasWorkspace{display:none;flex:1;min-height:0;overflow:auto}
+#canvasWorkspace.active{display:flex;flex-direction:column}
+#canvasWorkspace .canvas-wrap{flex:1;min-height:260px}
 /* Contextual controls stay tucked away until an item is selected. */
 .contextual-tools{display:none!important}
 .editor-layout.has-selection .contextual-tools{display:block!important}
@@ -97,11 +112,11 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
 #loginMessage{font-size:13px;color:var(--muted)}
 .viewer-canvas{display:block;width:100%;height:auto}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#30263d;color:white;padding:11px 17px;border-radius:999px;font-size:13px;z-index:150;display:none;max-width:90vw;text-align:center}
-@media(max-width:1050px){.editor-layout{grid-template-columns:190px minmax(320px,1fr) 245px;overflow-x:auto}.properties-panel{grid-column:auto;display:block}.properties-panel>div{min-width:0}}
+@media(max-width:1050px){.editor-layout{grid-template-columns:205px minmax(320px,1fr) 245px;overflow:auto}.properties-panel{grid-column:auto;display:block}.properties-panel>div{min-width:0}}
 @media(max-width:700px){.hero-inner{grid-template-columns:1fr}.hero{text-align:center;padding-top:20px}.hero-copy{margin:auto}.nav-tile{min-height:135px;padding:17px}.nav-tile strong{font-size:20px}.editor-layout{grid-template-columns:155px minmax(290px,1fr) 215px;overflow-x:auto;align-items:start}.properties-panel{display:block}.canvas-wrap{min-height:260px;padding:7px}.editor-top{padding:10px}.site-header{padding:15px 4vw}}
 
 /* Direct editing on the live page (admin only) */
-#directEditPanel{display:none;position:fixed;z-index:90;right:18px;top:90px;width:min(320px,calc(100vw - 28px));background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 18px 55px #24152e35}
+#directEditPanel{display:none;position:static;width:100%;margin:0 0 12px;background:#fff;color:#30263d;border:1px solid #e4dbe9;border-radius:13px;padding:13px;box-shadow:none}
 #directEditPanel.open{display:block}
 #directEditPanel label{display:block;font-size:11px;font-weight:800;margin:10px 0 5px;color:var(--muted)}
 #directEditPanel textarea,#directEditPanel input:not([type=color]){width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
@@ -109,7 +124,7 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
 .direct-edit-head{display:flex;align-items:center;justify-content:space-between}.direct-edit-head button{border:0;background:transparent;color:var(--ink);font-size:24px}
 .direct-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#directEditPanel .btn{width:100%;margin-top:12px}#directEditPanel small{display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:9px}
 .admin-selectable{outline:2px dashed #b58acb!important;outline-offset:4px;cursor:pointer!important}.admin-selected{outline:3px solid #c5a15b!important;outline-offset:4px}
-@media(max-width:700px){#directEditPanel{top:76px;bottom:auto;right:10px;max-height:calc(100vh - 90px);overflow:auto}}
+
 
 </style>
 </head>
@@ -212,16 +227,33 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
       <div class="status" id="editorStatus">Ready. Changes are not saved until you select Save to Supabase.</div>
     </aside>
 
-    <section>
-      <div class="page-tabs" style="justify-content:space-between;align-items:center">
-        <strong style="font-size:13px;color:#51445c">Design canvas</strong>
-        <span style="font-size:11px;color:#766b7e">Landscape page · 1100 × 650</span>
+    <section class="editor-middle">
+      <div class="workspace-tabs">
+        <button type="button" class="workspace-tab active" id="websitePreviewTab">Website preview</button>
+        <button type="button" class="workspace-tab" id="designCanvasTab">Free design canvas</button>
+        <span style="font-size:11px;color:#766b7e;margin-left:auto">Select an item on the website to edit it</span>
       </div>
-      <div class="canvas-wrap"><div class="canvas-frame"><canvas id="editorCanvas" width="1100" height="650"></canvas></div></div>
-      <p class="canvas-help">Select an item to reveal its editing and arrange controls in the side panels. Drag to move; use corner handles to resize and the top handle to rotate.</p>
+      <div id="sitePreviewMount" aria-label="Live portfolio website preview"></div>
+      <div id="canvasWorkspace">
+        <div class="page-tabs" style="justify-content:space-between;align-items:center">
+          <strong style="font-size:13px;color:#51445c">Free design canvas</strong>
+          <span style="font-size:11px;color:#766b7e">Landscape page · 1100 × 650</span>
+        </div>
+        <div class="canvas-wrap"><div class="canvas-frame"><canvas id="editorCanvas" width="1100" height="650"></canvas></div></div>
+        <p class="canvas-help">Drag to move; use corner handles to resize and the top handle to rotate. All existing design tools remain available.</p>
+      </div>
     </section>
 
     <aside class="panel properties-panel">
+      <div id="directEditPanel" aria-live="polite">
+        <div class="direct-edit-head"><strong>✦ Edit selected website item</strong><button type="button" id="directEditClose" aria-label="Close">×</button></div>
+        <p id="directEditHint">Choose an item in the website preview to edit it.</p>
+        <label for="directEditText">Text / label</label><textarea id="directEditText" rows="3"></textarea>
+        <div class="direct-edit-grid"><div><label for="directEditBg">Background</label><input type="color" id="directEditBg"></div><div><label for="directEditColor">Text colour</label><input type="color" id="directEditColor"></div></div>
+        <label for="directEditSize">Text size</label><input type="number" id="directEditSize" min="8" max="120">
+        <button type="button" class="btn gold" id="directEditApply">Apply changes</button>
+        <small>Changes are saved when you select “Save to Supabase”.</small>
+      </div>
       <div class="contextual-tools">
         <h3>Selected element</h3>
         <label for="objectText">Text / content</label><textarea id="objectText" rows="3" placeholder="Select a text element"></textarea>
@@ -272,15 +304,6 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
   <p id="loginMessage"></p><button class="btn ghost" id="closeLogin">Cancel</button>
 </div></div>
 <div id="toast" role="status"></div>
-<div id="directEditPanel" aria-live="polite">
-  <div class="direct-edit-head"><strong>✦ Edit selected item</strong><button type="button" id="directEditClose" aria-label="Close">×</button></div>
-  <p id="directEditHint">Choose an item on the page to edit it.</p>
-  <label for="directEditText">Text / label</label><textarea id="directEditText" rows="3"></textarea>
-  <div class="direct-edit-grid"><div><label for="directEditBg">Background</label><input type="color" id="directEditBg"></div><div><label for="directEditColor">Text colour</label><input type="color" id="directEditColor"></div></div>
-  <label for="directEditSize">Text size</label><input type="number" id="directEditSize" min="8" max="120">
-  <button type="button" class="btn gold" id="directEditApply">Apply changes</button>
-  <small>Changes are saved when you select “Save to Supabase” in the visual editor.</small>
-</div>
 
 <script>
 /* ---------- CONNECTION SETTINGS ---------- */
@@ -423,11 +446,11 @@ function applyVisualEdits(){
     if(v.fontSize)el.style.fontSize=v.fontSize+"px";
   });
 }
-function closeDirectEditor(){if(directSelected)directSelected.classList.remove("admin-selected");directSelected=null;directSelectedKey="";$("directEditPanel").classList.remove("open");}
+function closeDirectEditor(){if(directSelected)directSelected.classList.remove("admin-selected");directSelected=null;directSelectedKey="";$("directEditPanel").classList.remove("open");$("editor").querySelector(".editor-layout")?.classList.remove("has-selection");}
 function openDirectEditor(item){
   if(!isAdmin)return;
   if(directSelected)directSelected.classList.remove("admin-selected");
-  directSelected=item.el;directSelectedKey=item.key;directSelected.classList.add("admin-selected");
+  directSelected=item.el;directSelectedKey=item.key;directSelected.classList.add("admin-selected");$("editor").querySelector(".editor-layout")?.classList.add("has-selection");
   const key=item.key,el=item.el,edit=(siteData.visualEdits||{})[key]||{};
   const textNode=key.startsWith("home.tile")?el.querySelector("strong"):el;
   $("directEditText").value=edit.text!==undefined?edit.text:(textNode?.textContent||"").trim();
@@ -521,11 +544,48 @@ function switchPage(name){
   document.querySelectorAll(".page-tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
   loadPageObjects();status("Editing "+name+" page.");
 }
-function openEditor(){
-  editorOpen=true;$("editor").style.display="block";$("adminBar").style.display="flex";initialiseCanvas();$("editor").scrollIntoView({behavior:"smooth",block:"start"});
+let parkedSiteNodes=null;
+function moveWebsiteIntoWorkspace(){
+  const mount=$("sitePreviewMount");
+  if(!mount||parkedSiteNodes)return;
+  parkedSiteNodes=[document.querySelector(".site-header"),document.querySelector("main"),document.querySelector("footer")].filter(Boolean);
+  parkedSiteNodes.forEach(node=>mount.appendChild(node));
+  setupDirectSelection();
 }
-function closeEditor(){saveCanvasToPage();$("editor").style.display="none";editorOpen=false;renderPublicSite();window.scrollTo({top:0,behavior:"smooth"});}
-function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){$("editor").style.display="none";editorOpen=false;closeDirectEditor();document.querySelectorAll(".admin-selectable").forEach(el=>el.classList.remove("admin-selectable","admin-selected"));}else{setupDirectSelection();}}
+function restoreWebsiteToPage(){
+  if(!parkedSiteNodes)return;
+  const editor=$("editor");
+  parkedSiteNodes.forEach(node=>document.body.insertBefore(node,editor));
+  parkedSiteNodes=null;
+}
+function setWorkspaceTab(tab){
+  const preview=tab==="preview";
+  $("sitePreviewMount").style.display=preview?"block":"none";
+  $("canvasWorkspace").classList.toggle("active",!preview);
+  $("websitePreviewTab").classList.toggle("active",preview);
+  $("designCanvasTab").classList.toggle("active",!preview);
+  if(!preview&&canvas){canvas.calcOffset();canvas.requestRenderAll();}
+}
+function openEditor(){
+  editorOpen=true;
+  $("editor").style.display="block";
+  $("adminBar").style.display="none";
+  moveWebsiteIntoWorkspace();
+  setWorkspaceTab("preview");
+  initialiseCanvas();
+  setupDirectSelection();
+}
+function closeEditor(){
+  saveCanvasToPage();
+  closeDirectEditor();
+  restoreWebsiteToPage();
+  $("editor").style.display="none";
+  editorOpen=false;
+  $("adminBar").style.display=isAdmin?"flex":"none";
+  renderPublicSite();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){closeDirectEditor();restoreWebsiteToPage();$("editor").style.display="none";editorOpen=false;document.querySelectorAll(".admin-selectable").forEach(el=>el.classList.remove("admin-selectable","admin-selected"));}else{setupDirectSelection();}}
 async function loadContent(){
   const {data,error}=await db.from("site_content").select("content").eq("id",PORTFOLIO_RECORD_ID).maybeSingle();
   if(error){console.warn(error);toast("Could not load Supabase content. Showing the starter portfolio.");return;}
@@ -609,6 +669,8 @@ $("previewButton").onclick=()=>{saveCanvasToPage();renderPublicSite();$("publicS
 $("saveButton").onclick=saveContent;
 $("openEditorButton").onclick=openEditor;
 $("closeEditorButton").onclick=closeEditor;
+$("websitePreviewTab").addEventListener("click",()=>setWorkspaceTab("preview"));
+$("designCanvasTab").addEventListener("click",()=>setWorkspaceTab("canvas"));
 $("themeButton").onclick=()=>{siteData.theme=siteData.theme==="dark"?"light":"dark";document.body.classList.toggle("dark",siteData.theme==="dark");};
 $("loginButton").onclick=()=>{$("loginModal").style.display="flex";};
 $("closeLogin").onclick=()=>$("loginModal").style.display="none";
