@@ -690,5 +690,300 @@ window.addEventListener("beforeunload",e=>{if(editorOpen){e.preventDefault();e.r
 
 (async()=>{await loadContent();await checkSession();})();
 </script>
+/* =========================================================
+   ADDITIONAL WEBSITE / FREE CANVAS TRANSFER FUNCTIONS
+   Existing editor functions and Supabase settings are kept.
+========================================================= */
+
+let selectedWebsiteTile = null;
+let websiteTilePointer = null;
+
+// Add the new transfer buttons without replacing existing controls.
+(function addTransferControls() {
+  const panel = document.getElementById("directEditPanel");
+  if (!panel || document.getElementById("copyWebsiteTileToCanvas")) return;
+
+  const tileButton = document.createElement("button");
+  tileButton.type = "button";
+  tileButton.id = "copyWebsiteTileToCanvas";
+  tileButton.className = "btn";
+  tileButton.textContent = "Copy website tile to design canvas";
+  tileButton.style.cssText = "width:100%;margin-top:9px";
+  tileButton.onclick = copyWebsiteTileToCanvas;
+
+  const canvasButton = document.createElement("button");
+  canvasButton.type = "button";
+  canvasButton.id = "copyCanvasObjectToWebsite";
+  canvasButton.className = "btn";
+  canvasButton.textContent = "Copy canvas object to website";
+  canvasButton.style.cssText = "width:100%;margin-top:8px";
+  canvasButton.onclick = copyCanvasObjectToWebsite;
+
+  panel.appendChild(tileButton);
+  panel.appendChild(canvasButton);
+})();
+
+// Make project tiles selectable and movable/resizable in Website Preview.
+function initialiseWebsiteTileEditing() {
+  if (!isAdmin || !editorOpen) return;
+
+  document.querySelectorAll("#projectGrid .project-card").forEach((card, index) => {
+    card.classList.add("website-editable-tile");
+
+    const saved = siteData.visualEdits?.projectCards?.[index];
+
+    if (saved) {
+      card.style.transform = `translate(${saved.x || 0}px, ${saved.y || 0}px)`;
+      if (saved.width) card.style.width = saved.width + "px";
+    }
+
+    if (card.dataset.websiteEditorReady === "yes") return;
+    card.dataset.websiteEditorReady = "yes";
+
+    card.addEventListener("click", event => {
+      if (!isAdmin || !editorOpen) return;
+      if (event.target.classList.contains("website-resize-handle")) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (selectedWebsiteTile) {
+        selectedWebsiteTile.classList.remove("website-tile-selected");
+      }
+
+      selectedWebsiteTile = card;
+      card.classList.add("website-tile-selected");
+      $("directEditHint").textContent =
+        "Selected website project tile " + (index + 1);
+      $("directEditText").value =
+        card.innerText.trim();
+
+      $("directEditPanel").classList.add("open");
+      $("editor").querySelector(".editor-layout").classList.add("has-selection");
+    });
+
+    // Drag the selected tile.
+    card.addEventListener("pointerdown", event => {
+      if (!isAdmin || !editorOpen) return;
+      if (event.target.classList.contains("website-resize-handle")) return;
+
+      if (event.target.closest("button,a")) return;
+
+      selectedWebsiteTile = card;
+
+      const current = siteData.visualEdits?.projectCards?.[index] || {};
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const initialX = current.x || 0;
+      const initialY = current.y || 0;
+
+      websiteTilePointer = {
+        card, index, startX, startY, initialX, initialY
+      };
+
+      card.setPointerCapture(event.pointerId);
+    });
+
+    card.addEventListener("pointermove", event => {
+      if (!websiteTilePointer || websiteTilePointer.card !== card) return;
+
+      const dx = event.clientX - websiteTilePointer.startX;
+      const dy = event.clientY - websiteTilePointer.startY;
+      const x = websiteTilePointer.initialX + dx;
+      const y = websiteTilePointer.initialY + dy;
+
+      card.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+    card.addEventListener("pointerup", () => {
+      if (!websiteTilePointer || websiteTilePointer.card !== card) return;
+
+      const rect = card.getBoundingClientRect();
+      const parentRect = card.parentElement.getBoundingClientRect();
+      const transform = card.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+
+      siteData.visualEdits = siteData.visualEdits || {};
+      siteData.visualEdits.projectCards = siteData.visualEdits.projectCards || {};
+
+      siteData.visualEdits.projectCards[index] = {
+        ...(siteData.visualEdits.projectCards[index] || {}),
+        x: transform ? Number(transform[1]) : 0,
+        y: transform ? Number(transform[2]) : 0,
+        width: card.offsetWidth
+      };
+
+      websiteTilePointer = null;
+      status("Website tile position updated. Save to Supabase to publish.");
+    });
+
+    // Add a resize handle.
+    const handle = document.createElement("span");
+    handle.className = "website-resize-handle";
+    handle.title = "Drag to resize";
+    card.appendChild(handle);
+
+    handle.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const startWidth = card.offsetWidth;
+      const startX = event.clientX;
+
+      handle.setPointerCapture(event.pointerId);
+
+      const move = e => {
+        const width = Math.max(150, startWidth + e.clientX - startX);
+        card.style.width = width + "px";
+      };
+
+      const finish = () => {
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", finish);
+
+        siteData.visualEdits = siteData.visualEdits || {};
+        siteData.visualEdits.projectCards = siteData.visualEdits.projectCards || {};
+        siteData.visualEdits.projectCards[index] = {
+          ...(siteData.visualEdits.projectCards[index] || {}),
+          width: card.offsetWidth
+        };
+
+        status("Website tile size updated. Save to Supabase to publish.");
+      };
+
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", finish);
+    });
+  });
+}
+
+// Styling for selection and resize handles.
+(function addWebsiteTileStyles() {
+  if (document.getElementById("websiteTileEditorStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "websiteTileEditorStyles";
+  style.textContent = `
+    .website-editable-tile {
+      position: relative;
+      cursor: grab !important;
+      touch-action: pan-y;
+    }
+    .website-editable-tile.website-tile-selected {
+      outline: 3px solid #c5a15b !important;
+      outline-offset: 4px;
+    }
+    .website-resize-handle {
+      display: none;
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      background: #c5a15b;
+      border: 2px solid white;
+      cursor: nwse-resize;
+      touch-action: none;
+    }
+    body.admin-editing .website-resize-handle {
+      display: block;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// Copy a website project tile into the free canvas.
+// The original website tile is not removed or changed.
+function copyWebsiteTileToCanvas() {
+  if (!selectedWebsiteTile || !canvas) {
+    toast("Select a project tile in Website Preview first.");
+    return;
+  }
+
+  const title = selectedWebsiteTile.querySelector("h3")?.textContent || "Copied project";
+  const description = selectedWebsiteTile.querySelector("p")?.textContent || "";
+
+  const background = new fabric.Rect({
+    left: 90, top: 100, width: 430, height: 220,
+    fill: "#eee8f8", rx: 20, ry: 20
+  });
+
+  const text = new fabric.Textbox(
+    title + (description ? "\n" + description : ""),
+    {
+      left: 115, top: 125, width: 380,
+      fontSize: 25, fontFamily: "Arial",
+      fill: "#393044", splitByGrapheme: true
+    }
+  );
+
+  addObject(background);
+  addObject(text);
+
+  toast("Project tile copied to Free Design Canvas.");
+}
+
+// Copy the selected free-canvas object to the Projects page.
+// A separate JSON copy is stored, so the original stays independent.
+function copyCanvasObjectToWebsite() {
+  if (!canvas || !active()) {
+    toast("Select an object on Free Design Canvas first.");
+    return;
+  }
+
+  const copiedObject = JSON.parse(JSON.stringify(objectToJSON(active())));
+
+  siteData.pages.projects.objects =
+    siteData.pages.projects.objects || [];
+
+  // Give the copy a small offset so it is distinguishable.
+  copiedObject.left = (copiedObject.left || 0) + 25;
+  copiedObject.top = (copiedObject.top || 0) + 25;
+
+  siteData.pages.projects.objects.push(copiedObject);
+
+  renderPublicSite();
+
+  if (editorOpen) {
+    moveWebsiteIntoWorkspace();
+    setWorkspaceTab("preview");
+    initialiseWebsiteTileEditing();
+  }
+
+  status("A separate copy has been added to the Projects page. Save to Supabase to publish.");
+  toast("Canvas object copied to the website.");
+}
+
+// Watch for project tiles being regenerated by the existing website renderer.
+const websiteTileObserver = new MutationObserver(() => {
+  if (isAdmin && editorOpen) initialiseWebsiteTileEditing();
+});
+
+websiteTileObserver.observe(document.getElementById("projectGrid"), {
+  childList: true,
+  subtree: true
+});
+
+// Keep the existing editor's open process intact and initialise the new tools.
+const originalOpenEditorForWebsiteTiles = openEditor;
+
+openEditor = function() {
+  originalOpenEditorForWebsiteTiles();
+  document.body.classList.add("admin-editing");
+  initialiseWebsiteTileEditing();
+};
+
+// Keep the existing close process intact.
+const originalCloseEditorForWebsiteTiles = closeEditor;
+
+closeEditor = function() {
+  document.body.classList.remove("admin-editing");
+  if (selectedWebsiteTile) {
+    selectedWebsiteTile.classList.remove("website-tile-selected");
+    selectedWebsiteTile = null;
+  }
+  originalCloseEditorForWebsiteTiles();
+};
+
 </body>
 </html>
