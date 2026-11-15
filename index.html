@@ -59,7 +59,14 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
 .editor-top .right{display:flex;gap:7px;flex-wrap:wrap}
 .editor-top button,.tool-btn{border:1px solid #ddd1e5;background:#fff;color:#30263d;border-radius:9px;padding:8px 11px;font-weight:700}
 .editor-top button.primary{background:#c5a15b;color:white;border-color:#c5a15b}
-.editor-layout{display:grid;grid-template-columns:230px minmax(0,1fr) 245px;gap:14px;padding:14px;max-width:1700px;margin:auto}
+.editor-layout{display:grid;grid-template-columns:230px minmax(320px,1fr) 270px;gap:14px;padding:14px;max-width:1700px;margin:auto;align-items:start}
+/* Contextual controls stay tucked away until an item is selected. */
+.contextual-tools{display:none!important}
+.editor-layout.has-selection .contextual-tools{display:block!important}
+.editor-layout.has-selection .contextual-tools.tool-grid{display:grid!important}
+.editor-layout.has-selection .contextual-tools.tool-grid.wide{display:grid!important}
+.properties-panel{align-self:stretch}
+.properties-panel>div.contextual-tools{padding-bottom:10px;border-bottom:1px solid #eee7f1;margin-bottom:12px}
 .panel{background:#fff;border:1px solid #e4dbe9;border-radius:13px;padding:13px;min-width:0}
 .panel h3{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:#796b83;margin:2px 0 12px}
 .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -90,8 +97,20 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
 #loginMessage{font-size:13px;color:var(--muted)}
 .viewer-canvas{display:block;width:100%;height:auto}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#30263d;color:white;padding:11px 17px;border-radius:999px;font-size:13px;z-index:150;display:none;max-width:90vw;text-align:center}
-@media(max-width:1050px){.editor-layout{grid-template-columns:190px minmax(0,1fr)}.properties-panel{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.properties-panel>div{min-width:0}}
-@media(max-width:700px){.hero-inner{grid-template-columns:1fr}.hero{text-align:center;padding-top:20px}.hero-copy{margin:auto}.nav-tile{min-height:135px;padding:17px}.nav-tile strong{font-size:20px}.editor-layout{grid-template-columns:1fr}.properties-panel{display:block}.canvas-wrap{min-height:260px;padding:7px}.editor-top{padding:10px}.site-header{padding:15px 4vw}}
+@media(max-width:1050px){.editor-layout{grid-template-columns:190px minmax(320px,1fr) 245px;overflow-x:auto}.properties-panel{grid-column:auto;display:block}.properties-panel>div{min-width:0}}
+@media(max-width:700px){.hero-inner{grid-template-columns:1fr}.hero{text-align:center;padding-top:20px}.hero-copy{margin:auto}.nav-tile{min-height:135px;padding:17px}.nav-tile strong{font-size:20px}.editor-layout{grid-template-columns:155px minmax(290px,1fr) 215px;overflow-x:auto;align-items:start}.properties-panel{display:block}.canvas-wrap{min-height:260px;padding:7px}.editor-top{padding:10px}.site-header{padding:15px 4vw}}
+
+/* Direct editing on the live page (admin only) */
+#directEditPanel{display:none;position:fixed;z-index:90;right:18px;top:90px;width:min(320px,calc(100vw - 28px));background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 18px 55px #24152e35}
+#directEditPanel.open{display:block}
+#directEditPanel label{display:block;font-size:11px;font-weight:800;margin:10px 0 5px;color:var(--muted)}
+#directEditPanel textarea,#directEditPanel input:not([type=color]){width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+#directEditPanel input[type=color]{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;padding:3px;background:var(--panel)}
+.direct-edit-head{display:flex;align-items:center;justify-content:space-between}.direct-edit-head button{border:0;background:transparent;color:var(--ink);font-size:24px}
+.direct-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#directEditPanel .btn{width:100%;margin-top:12px}#directEditPanel small{display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:9px}
+.admin-selectable{outline:2px dashed #b58acb!important;outline-offset:4px;cursor:pointer!important}.admin-selected{outline:3px solid #c5a15b!important;outline-offset:4px}
+@media(max-width:700px){#directEditPanel{top:76px;bottom:auto;right:10px;max-height:calc(100vh - 90px);overflow:auto}}
+
 </style>
 </head>
 <body>
@@ -177,15 +196,17 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
       <div class="mini-actions">
         <button id="addPageButton">＋ Add page</button><button id="resetPageButton">Reset page</button>
       </div>
-      <h3 style="margin-top:20px">Arrange</h3>
-      <div class="tool-grid">
-        <button class="tool-btn" id="bringFront">Bring forward</button>
-        <button class="tool-btn" id="sendBack">Send backward</button>
-        <button class="tool-btn" id="duplicateObject">Duplicate</button>
-        <button class="tool-btn" id="deleteObject">Delete</button>
-        <button class="tool-btn" id="lockObject">Lock / unlock</button>
-        <button class="tool-btn" id="copyObject">Copy</button>
-        <button class="tool-btn wide" id="pasteObject">Paste</button>
+      <div class="contextual-tools">
+        <h3 style="margin-top:20px">Arrange selected item</h3>
+        <div class="tool-grid">
+          <button class="tool-btn" id="bringFront">Bring forward</button>
+          <button class="tool-btn" id="sendBack">Send backward</button>
+          <button class="tool-btn" id="duplicateObject">Duplicate</button>
+          <button class="tool-btn" id="deleteObject">Delete</button>
+          <button class="tool-btn" id="lockObject">Lock / unlock</button>
+          <button class="tool-btn" id="copyObject">Copy</button>
+          <button class="tool-btn wide" id="pasteObject">Paste</button>
+        </div>
       </div>
       <p class="canvas-help">Select an item on the canvas to move, resize or rotate it. Use the handles around the selected item.</p>
       <div class="status" id="editorStatus">Ready. Changes are not saved until you select Save to Supabase.</div>
@@ -197,11 +218,11 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
         <span style="font-size:11px;color:#766b7e">Landscape page · 1100 × 650</span>
       </div>
       <div class="canvas-wrap"><div class="canvas-frame"><canvas id="editorCanvas" width="1100" height="650"></canvas></div></div>
-      <p class="canvas-help">Tip: click an item to select it. Drag to move; use corner handles to resize and the top handle to rotate. On a phone, use the properties panel below the canvas.</p>
+      <p class="canvas-help">Select an item to reveal its editing and arrange controls in the side panels. Drag to move; use corner handles to resize and the top handle to rotate.</p>
     </section>
 
     <aside class="panel properties-panel">
-      <div>
+      <div class="contextual-tools">
         <h3>Selected element</h3>
         <label for="objectText">Text / content</label><textarea id="objectText" rows="3" placeholder="Select a text element"></textarea>
         <label for="fontFamily">Font</label><select id="fontFamily"><option>Arial</option><option>Georgia</option><option>Times New Roman</option><option>Verdana</option><option>Trebuchet MS</option><option>Courier New</option></select>
@@ -213,7 +234,7 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
           <button id="boldText">Bold</button><button id="italicText">Italic</button><button id="underlineText">Underline</button>
         </div>
       </div>
-      <div>
+      <div class="contextual-tools">
         <h3>Appearance & position</h3>
         <div class="row-fields">
           <div><label for="fillColor">Fill / text colour</label><input type="color" id="fillColor" value="#393044"></div>
@@ -251,6 +272,15 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
   <p id="loginMessage"></p><button class="btn ghost" id="closeLogin">Cancel</button>
 </div></div>
 <div id="toast" role="status"></div>
+<div id="directEditPanel" aria-live="polite">
+  <div class="direct-edit-head"><strong>✦ Edit selected item</strong><button type="button" id="directEditClose" aria-label="Close">×</button></div>
+  <p id="directEditHint">Choose an item on the page to edit it.</p>
+  <label for="directEditText">Text / label</label><textarea id="directEditText" rows="3"></textarea>
+  <div class="direct-edit-grid"><div><label for="directEditBg">Background</label><input type="color" id="directEditBg"></div><div><label for="directEditColor">Text colour</label><input type="color" id="directEditColor"></div></div>
+  <label for="directEditSize">Text size</label><input type="number" id="directEditSize" min="8" max="120">
+  <button type="button" class="btn gold" id="directEditApply">Apply changes</button>
+  <small>Changes are saved when you select “Save to Supabase” in the visual editor.</small>
+</div>
 
 <script>
 /* ---------- CONNECTION SETTINGS ---------- */
@@ -266,6 +296,8 @@ let isAdmin = false, editorOpen = false, currentPage = "home";
 let siteData = defaultData();
 let canvas = null, history = [], historyIndex = -1, restoring = false, clipboardObject = null;
 let saveTimer = null;
+let directSelected = null;
+let directSelectedKey = "";
 
 function defaultData(){
   const pages = {};
@@ -359,6 +391,8 @@ function renderPublicSite(){
   $("contactEmail").textContent=siteData.contactEmail||"your-email@example.com";
   $("contactEmail").href="mailto:"+(siteData.contactEmail||"your-email@example.com");
   $("footerText").textContent=siteData.footer||"Designed with curiosity · Heli Patel";
+  applyVisualEdits();
+  if(isAdmin)setupDirectSelection();
   // If a user has designed a page in the editor, show the saved design as a canvas preview below its standard section.
   document.querySelectorAll(".custom-page-preview").forEach(e=>e.remove());
   ["about","projects","contact"].forEach(key=>{
@@ -369,6 +403,58 @@ function renderPublicSite(){
     renderPageToCanvas(p,c,false).then(sc=>{sc.dispose();if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){(p.objects||[]).forEach((o,i)=>{if(o.animate){const el=c.parentElement;el.animate([{transform:"translateY(0)"},{transform:"translateY(-5px)"},{transform:"translateY(0)"}],{duration:2600+i*150,iterations:Infinity});}});}});
   });
 }
+function editableElements(){
+  const selectors=[
+    ["home.heroTitle","#heroTitle"],["home.heroEyebrow","#heroEyebrow"],["home.heroIntro","#heroIntro"],
+    ["home.tileHome",".nav-tile:nth-child(1)"],["home.tileAbout",".nav-tile:nth-child(2)"],["home.tileProjects",".nav-tile:nth-child(3)"],["home.tileContact",".nav-tile:nth-child(4)"],
+    ["about.eyebrow","#aboutEyebrow"],["about.title","#aboutTitle"],["about.text","#aboutText"],
+    ["projects.eyebrow","#projectsEyebrow"],["projects.title","#projectsTitle"],["projects.intro","#projectsIntro"],
+    ["contact.eyebrow","#contactEyebrow"],["contact.title","#contactTitle"],["contact.text","#contactText"],["contact.email","#contactEmail"],["footer.text","#footerText"]
+  ];
+  return selectors.map(([key,selector])=>({key,el:document.querySelector(selector)})).filter(x=>x.el);
+}
+function applyVisualEdits(){
+  const edits=siteData.visualEdits||{};
+  editableElements().forEach(({key,el})=>{
+    const v=edits[key];if(!v)return;
+    if(v.text!==undefined){if(key.startsWith("home.tile")){const strong=el.querySelector("strong");if(strong)strong.textContent=v.text;}else if(key==="contact.email"){el.textContent=v.text;el.href="mailto:"+v.text;}else if(key==="footer.text"){el.textContent=v.text;}else el.textContent=v.text;}
+    if(v.background)el.style.backgroundColor=v.background;
+    if(v.color)el.style.color=v.color;
+    if(v.fontSize)el.style.fontSize=v.fontSize+"px";
+  });
+}
+function closeDirectEditor(){if(directSelected)directSelected.classList.remove("admin-selected");directSelected=null;directSelectedKey="";$("directEditPanel").classList.remove("open");}
+function openDirectEditor(item){
+  if(!isAdmin)return;
+  if(directSelected)directSelected.classList.remove("admin-selected");
+  directSelected=item.el;directSelectedKey=item.key;directSelected.classList.add("admin-selected");
+  const key=item.key,el=item.el,edit=(siteData.visualEdits||{})[key]||{};
+  const textNode=key.startsWith("home.tile")?el.querySelector("strong"):el;
+  $("directEditText").value=edit.text!==undefined?edit.text:(textNode?.textContent||"").trim();
+  $("directEditBg").value=toHex(edit.background||getComputedStyle(el).backgroundColor)||"#fffaf5";
+  $("directEditColor").value=toHex(edit.color||getComputedStyle(textNode||el).color)||"#393044";
+  $("directEditSize").value=parseInt(edit.fontSize||getComputedStyle(textNode||el).fontSize,10)||18;
+  $("directEditHint").textContent="Selected: "+key.replaceAll("."," · ");
+  $("directEditPanel").classList.add("open");
+}
+function setupDirectSelection(){
+  editableElements().forEach(item=>{
+    item.el.classList.add("admin-selectable");
+    if(item.el.dataset.directEditBound==="yes")return;
+    item.el.dataset.directEditBound="yes";
+    item.el.addEventListener("click",function(e){if(!isAdmin)return;e.preventDefault();e.stopPropagation();openDirectEditor(item);});
+  });
+}
+function applyDirectEdit(){
+  if(!directSelected||!directSelectedKey)return;
+  const key=directSelectedKey,el=directSelected,text=$("directEditText").value,bg=$("directEditBg").value,color=$("directEditColor").value,size=Number($("directEditSize").value)||18;
+  siteData.visualEdits=siteData.visualEdits||{};siteData.visualEdits[key]={text,background:bg,color,fontSize:size};
+  const textNode=key.startsWith("home.tile")?el.querySelector("strong"):el;
+  if(textNode){textNode.textContent=text;if(key==="contact.email")el.href="mailto:"+text;}
+  el.style.backgroundColor=bg;el.style.color=color;textNode.style.color=color;textNode.style.fontSize=size+"px";
+  status("Live preview updated. Select Save to Supabase to publish the changes.");toast("Preview updated — remember to save to Supabase.");
+}
+
 function initialiseCanvas(){
   if(canvas){canvas.dispose();canvas=null;}
   canvas=new fabric.Canvas("editorCanvas",{backgroundColor:pageData().background||"#fffaf5",preserveObjectStacking:true,selection:true});
@@ -417,6 +503,7 @@ function refreshLayers(){
 }
 function updateProperties(){
   const o=active();if(!o)return;
+  $("editor").querySelector(".editor-layout").classList.add("has-selection");
   $("objectText").value=o.type==="textbox"?o.text:"";
   $("fontFamily").value=o.fontFamily||"Arial";$("fontSize").value=o.fontSize||32;$("textAlign").value=o.textAlign||"left";
   $("fillColor").value=toHex(o.fill)||"#393044";$("strokeColor").value=toHex(o.stroke)||"#c5a15b";
@@ -426,7 +513,7 @@ function updateProperties(){
   $("animateObject").checked=!!o.animateOnView;$("lockToggle").checked=!!o.locked;
   refreshLayers();
 }
-function clearProperties(){["objectText"].forEach(id=>$(id).value="");}
+function clearProperties(){["objectText"].forEach(id=>$(id).value="");$("editor").querySelector(".editor-layout").classList.remove("has-selection");}
 function toHex(value){if(typeof value!=="string"||!value.startsWith("#"))return null;return value.length===4?"#"+value[1]+value[1]+value[2]+value[2]+value[3]+value[3]:value.slice(0,7);}
 function updateActive(fn){const o=active();if(!o)return;fn(o);o.setCoords();canvas.requestRenderAll();updateProperties();recordHistory();}
 function switchPage(name){
@@ -438,7 +525,7 @@ function openEditor(){
   editorOpen=true;$("editor").style.display="block";$("adminBar").style.display="flex";initialiseCanvas();$("editor").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function closeEditor(){saveCanvasToPage();$("editor").style.display="none";editorOpen=false;renderPublicSite();window.scrollTo({top:0,behavior:"smooth"});}
-function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){$("editor").style.display="none";editorOpen=false;}}
+function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){$("editor").style.display="none";editorOpen=false;closeDirectEditor();document.querySelectorAll(".admin-selectable").forEach(el=>el.classList.remove("admin-selectable","admin-selected"));}else{setupDirectSelection();}}
 async function loadContent(){
   const {data,error}=await db.from("site_content").select("content").eq("id",PORTFOLIO_RECORD_ID).maybeSingle();
   if(error){console.warn(error);toast("Could not load Supabase content. Showing the starter portfolio.");return;}
@@ -527,6 +614,8 @@ $("loginButton").onclick=()=>{$("loginModal").style.display="flex";};
 $("closeLogin").onclick=()=>$("loginModal").style.display="none";
 $("loginModal").onclick=e=>{if(e.target===$("loginModal"))$("loginModal").style.display="none";};
 $("logoutButton").onclick=async()=>{await db.auth.signOut();setEditorEnabled(false);toast("You have been logged out.");};
+$("directEditClose").onclick=closeDirectEditor;
+$("directEditApply").onclick=applyDirectEdit;
 $("loginForm").onsubmit=async e=>{
   e.preventDefault();$("loginMessage").textContent="Signing in…";
   const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
