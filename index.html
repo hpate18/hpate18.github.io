@@ -366,7 +366,7 @@ function renderPublicSite(){
     const section=$(key);const shell=section.querySelector(".section-shell");
     const preview=document.createElement("div");preview.className="custom-page-preview";preview.style.cssText="max-width:1120px;margin:18px auto 0;background:"+ (p.background||"#fffaf5")+";border-radius:22px;overflow:hidden;box-shadow:var(--shadow)";
     const c=document.createElement("canvas");c.className="viewer-canvas";c.width=CANVAS_W;c.height=CANVAS_H;preview.appendChild(c);section.appendChild(preview);
-    renderPageToCanvas(p,c,false).then(sc=>{sc.dispose();if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){(p.objects||[]).forEach((o,i)=>{if(o.animate){const el=c.parentElement;el.animate([{transform:"translateY(0)"},{transform:"translateY(-5px)"},{transform:"translateY(0)"}],{duration:2600+i*150,iterations:Infinity});}}}});
+    renderPageToCanvas(p,c,false).then(sc=>{sc.dispose();if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){(p.objects||[]).forEach((o,i)=>{if(o.animate){const el=c.parentElement;el.animate([{transform:"translateY(0)"},{transform:"translateY(-5px)"},{transform:"translateY(0)"}],{duration:2600+i*150,iterations:Infinity});}});}});
   });
 }
 function initialiseCanvas(){
