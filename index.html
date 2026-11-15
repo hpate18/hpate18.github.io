@@ -689,12 +689,7 @@ db.auth.onAuthStateChange((_event,session)=>{const user=session?.user;setEditorE
 window.addEventListener("beforeunload",e=>{if(editorOpen){e.preventDefault();e.returnValue="You may have unsaved portfolio changes.";}});
 
 (async()=>{await loadContent();await checkSession();})();
-</script>
-/* =========================================================
-   ADDITIONAL WEBSITE / FREE CANVAS TRANSFER FUNCTIONS
-   Existing editor functions and Supabase settings are kept.
-========================================================= */
-
+  
 let selectedWebsiteTile = null;
 let websiteTilePointer = null;
 
@@ -984,6 +979,6 @@ closeEditor = function() {
   }
   originalCloseEditorForWebsiteTiles();
 };
-
+</script>
 </body>
 </html>
