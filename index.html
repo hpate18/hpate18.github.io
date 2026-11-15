@@ -3,234 +3,541 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f8eff6">
 <title>Heli Patel | Engineering Portfolio</title>
+
+<!-- Supabase stores the portfolio. Fabric.js powers the visual editor. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
 <style>
-:root{--pink:#f5dce8;--purple:#dcd2f4;--lilac:#eee8fa;--cream:#fffaf5;--gold:#c49b50;--ink:#383044;--panel:#fffdfb;--muted:#776e7e}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,Arial,sans-serif;transition:.25s}
-body.dark{--cream:#211d2a;--panel:#302a3a;--ink:#f8efff;--muted:#c7bbd0;--pink:#594052;--purple:#453b60;--lilac:#393047}
-button,input,textarea{font:inherit}button{cursor:pointer}
-header{display:flex;justify-content:space-between;align-items:center;padding:20px 6%;gap:12px}
-.brand{font-weight:800;letter-spacing:2px;font-size:18px}.actions{display:flex;gap:9px;flex-wrap:wrap}
-.btn{border:0;border-radius:30px;padding:11px 17px;background:var(--purple);color:var(--ink);font-weight:700}.gold{background:var(--gold);color:white}.soft{background:var(--panel);border:1px solid #c9b9d8}
-.hero{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:40px 7%}
-.hero-inner{width:min(100%,1050px);display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:center}
-.eyebrow{text-transform:uppercase;letter-spacing:4px;color:var(--gold);font-size:12px;font-weight:800}
-h1{font-size:clamp(48px,7vw,86px);line-height:.98;margin:18px 0}h1 span{color:#b28cc9}
-.subtitle{font-size:19px;color:var(--muted);line-height:1.7;max-width:470px}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.tile{min-height:170px;border-radius:24px;padding:25px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;transition:.2s;box-shadow:0 8px 25px #6a526015}
-.tile:hover{transform:translateY(-5px)}.tile:nth-child(1){background:var(--pink)}.tile:nth-child(2){background:var(--purple)}.tile:nth-child(3){background:var(--lilac)}.tile:nth-child(4){background:#f4e8ce}
-.tile .number{font-size:12px;opacity:.7}.tile strong{font-size:23px}.tile .arrow{font-size:24px;text-align:right}
-section.content-section{padding:55px 7%;scroll-margin-top:20px}.section-card{max-width:1000px;margin:auto;background:var(--panel);padding:35px;border-radius:25px;box-shadow:0 10px 35px #0000000b}
-.section-card h2{font-size:34px;margin:12px 0}.section-card p{line-height:1.8;color:var(--muted);white-space:pre-line}
-.project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.project{background:var(--lilac);padding:22px;border-radius:18px}.project h3{margin-top:0}
-footer{text-align:center;padding:35px;color:var(--muted)}
-#adminBar{display:none;position:sticky;top:0;z-index:10;background:#30263d;color:white;padding:10px 4%;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-#adminBar button{border:0;border-radius:20px;padding:9px 13px;margin:2px;background:#eee3fa;color:#30263d;font-weight:700}
-.modal-backdrop{display:none;position:fixed;inset:0;background:#21182c99;z-index:50;align-items:center;justify-content:center;padding:20px}
-.modal{background:var(--panel);color:var(--ink);padding:28px;border-radius:20px;width:min(100%,430px);max-height:90vh;overflow:auto}
-.modal input,.modal textarea{width:100%;padding:11px;margin:7px 0 13px;border:1px solid #cbbdd6;border-radius:9px;background:var(--panel);color:var(--ink)}
-.modal label{font-size:13px;font-weight:700}.modal h2{margin-top:0}
-#message{font-size:13px;color:var(--muted);min-height:18px}
-@media(max-width:760px){.hero-inner{grid-template-columns:1fr}.hero{padding-top:15px}.intro{text-align:center}.subtitle{margin:auto}}
-@media(max-width:430px){header{padding:15px 4%}.brand{font-size:14px}.tile{min-height:135px;padding:17px}.tile strong{font-size:19px}.tiles{gap:9px}.section-card{padding:24px}}
+:root{
+  --pink:#f4dce9;--purple:#ded5f3;--lilac:#eee8f8;--cream:#fffaf5;
+  --gold:#c5a15b;--ink:#393044;--muted:#766d7e;--panel:#fffdfb;
+  --line:#e8deeb;--shadow:0 14px 45px #4d365b12;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;transition:background .2s,color .2s}
+body.dark{--pink:#594454;--purple:#453d5c;--lilac:#393044;--cream:#211d29;--ink:#f8efff;--muted:#c9bed0;--panel:#302a39;--line:#4b4055;--shadow:0 14px 45px #0003}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px clamp(18px,5vw,72px)}
+.brand{font-size:16px;font-weight:850;letter-spacing:2.5px}
+.brand span{color:var(--gold)}
+.header-actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:10px 16px;background:var(--purple);color:var(--ink);font-weight:700}
+.btn.gold{background:var(--gold);color:white}
+.btn.ghost{background:var(--panel);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hero{min-height:78vh;display:grid;place-items:center;padding:45px 6vw}
+.hero-inner{width:min(1120px,100%);display:grid;grid-template-columns:1fr 1fr;gap:clamp(25px,5vw,65px);align-items:center}
+.eyebrow{text-transform:uppercase;letter-spacing:3px;font-size:11px;font-weight:850;color:var(--gold)}
+.hero h1{font-size:clamp(55px,8vw,100px);line-height:.94;letter-spacing:-5px;margin:17px 0}
+.hero h1 span{color:#ad8ac7}
+.hero-copy{font-size:18px;line-height:1.8;color:var(--muted);max-width:510px}
+.nav-tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.nav-tile{min-height:170px;border-radius:25px;padding:23px;text-decoration:none;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow);transition:transform .2s}
+.nav-tile:hover{transform:translateY(-5px)}
+.nav-tile:nth-child(1){background:var(--pink)}.nav-tile:nth-child(2){background:var(--purple)}.nav-tile:nth-child(3){background:var(--lilac)}.nav-tile:nth-child(4){background:#f3e8d0}
+.nav-tile small{letter-spacing:1.5px;opacity:.7}.nav-tile strong{font-size:25px}.nav-tile .arrow{text-align:right;font-size:24px}
+.page-section{padding:52px 6vw;scroll-margin-top:15px}
+.section-shell{width:min(1120px,100%);margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:clamp(22px,4vw,48px);box-shadow:var(--shadow)}
+.section-shell h2{font-size:clamp(30px,4vw,44px);margin:12px 0}
+.section-shell p{color:var(--muted);line-height:1.85;white-space:pre-line}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-top:25px}
+.project-card{padding:23px;border-radius:19px;background:var(--lilac);min-height:150px}
+.project-card h3{margin-top:0}.project-card p{margin-bottom:0}
+footer{text-align:center;padding:38px 20px;color:var(--muted)}
+#adminBar{display:none;position:sticky;top:0;z-index:20;background:#30263d;color:white;padding:10px 4vw;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#adminBar .bar-actions{display:flex;gap:7px;flex-wrap:wrap}
+#adminBar button{border:0;border-radius:20px;padding:9px 13px;background:#eee3fa;color:#30263d;font-weight:750}
+#editor{display:none;background:#f5f1f7;color:#30263d;border-top:1px solid #ded4e6;border-bottom:1px solid #ded4e6}
+.editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 3vw;background:#fff}
+.editor-top strong{font-size:15px}
+.editor-top .right{display:flex;gap:7px;flex-wrap:wrap}
+.editor-top button,.tool-btn{border:1px solid #ddd1e5;background:#fff;color:#30263d;border-radius:9px;padding:8px 11px;font-weight:700}
+.editor-top button.primary{background:#c5a15b;color:white;border-color:#c5a15b}
+.editor-layout{display:grid;grid-template-columns:230px minmax(0,1fr) 245px;gap:14px;padding:14px;max-width:1700px;margin:auto}
+.panel{background:#fff;border:1px solid #e4dbe9;border-radius:13px;padding:13px;min-width:0}
+.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:#796b83;margin:2px 0 12px}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tool-btn{font-size:12px;min-height:37px}
+.tool-btn:hover,.editor-top button:hover{background:#f4edf8}
+.tool-btn.wide{grid-column:1/-1}
+.panel label{display:block;font-size:11px;font-weight:750;color:#71647b;margin:12px 0 5px}
+.panel input,.panel select,.panel textarea{width:100%;border:1px solid #ded4e5;border-radius:8px;padding:8px;background:#fff;color:#30263d;min-width:0}
+.panel input[type=color]{height:36px;padding:3px}
+.panel input[type=checkbox]{width:auto}
+.panel .row-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.panel .mini-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.panel .mini-actions button{border:1px solid #ded4e5;background:#fff;border-radius:8px;padding:7px 9px;font-size:11px}
+.page-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.page-tab{border:1px solid #ded4e5;background:white;color:#30263d;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:750}
+.page-tab.active{background:#ded5f3;border-color:#c6b7e7}
+.canvas-wrap{background:#e8e2ec;border-radius:12px;padding:14px;overflow:auto;min-height:400px;display:flex;justify-content:center;align-items:flex-start}
+.canvas-frame{width:100%;max-width:880px;box-shadow:0 8px 25px #34233d20;background:white;line-height:0}
+#editorCanvas{display:block;width:100%;height:auto}
+.canvas-help{font-size:11px;color:#746b7a;line-height:1.5;margin:9px 2px 0}
+#layerList{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:5px}
+.layer-item{border:1px solid #e4dbe9;background:#fff;border-radius:8px;padding:8px;text-align:left;font-size:11px;color:#30263d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layer-item.selected{background:#eee8f8;border-color:#ad8ac7;font-weight:800}
+.status{font-size:11px;color:#746b7a;min-height:17px;margin-top:8px;line-height:1.45}
+.modal-backdrop{display:none;position:fixed;inset:0;background:#21182caa;z-index:100;align-items:center;justify-content:center;padding:18px}
+.modal{background:var(--panel);color:var(--ink);padding:27px;border-radius:20px;width:min(430px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+.modal h2{margin-top:0}.modal input{width:100%;padding:11px;margin:7px 0 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+#loginMessage{font-size:13px;color:var(--muted)}
+.viewer-canvas{display:block;width:100%;height:auto}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#30263d;color:white;padding:11px 17px;border-radius:999px;font-size:13px;z-index:150;display:none;max-width:90vw;text-align:center}
+@media(max-width:1050px){.editor-layout{grid-template-columns:190px minmax(0,1fr)}.properties-panel{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.properties-panel>div{min-width:0}}
+@media(max-width:700px){.hero-inner{grid-template-columns:1fr}.hero{text-align:center;padding-top:20px}.hero-copy{margin:auto}.nav-tile{min-height:135px;padding:17px}.nav-tile strong{font-size:20px}.editor-layout{grid-template-columns:1fr}.properties-panel{display:block}.canvas-wrap{min-height:260px;padding:7px}.editor-top{padding:10px}.site-header{padding:15px 4vw}}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">HELI PATEL <span style="color:var(--gold)">✳</span></div>
-  <div class="actions">
-    <button class="btn soft" id="themeButton">☾ Theme</button>
-    <button class="btn soft" id="loginButton">Admin login</button>
+<header class="site-header">
+  <div class="brand">HELI PATEL <span>✳</span></div>
+  <div class="header-actions">
+    <button class="btn ghost" id="themeButton">☾ Theme</button>
+    <button class="btn ghost" id="loginButton">Admin login</button>
   </div>
 </header>
 
 <div id="adminBar">
   <strong>✦ Admin mode</strong>
-  <div><button id="editButton">Edit portfolio content</button><button id="logoutButton">Log out</button></div>
+  <div class="bar-actions">
+    <button id="openEditorButton">Open visual editor</button>
+    <button id="logoutButton">Log out</button>
+  </div>
 </div>
 
-<main>
-<section class="hero" id="home"><div class="hero-inner">
-  <div class="intro">
-    <div class="eyebrow" id="heroEyebrow">Engineering portfolio</div>
-    <h1 id="heroTitle">Heli<br><span>Patel.</span></h1>
-    <p class="subtitle" id="heroIntro">An aspiring engineer, curious thinker and creative problem solver. Welcome to my portfolio — a space for my ideas, projects and progress.</p>
-    <a href="#projects"><button class="btn gold">Explore my work ↗</button></a>
-  </div>
-  <nav class="tiles" aria-label="Main navigation">
-    <a class="tile" href="#home"><span class="number">01 / WELCOME</span><strong>Home</strong><span class="arrow">↗</span></a>
-    <a class="tile" href="#about"><span class="number">02 / MY STORY</span><strong>About</strong><span class="arrow">↗</span></a>
-    <a class="tile" href="#projects"><span class="number">03 / WHAT I DO</span><strong>Projects</strong><span class="arrow">↗</span></a>
-    <a class="tile" href="#contact"><span class="number">04 / SAY HELLO</span><strong>Contact</strong><span class="arrow">↗</span></a>
-  </nav>
-</div></section>
-
-<section class="content-section" id="about"><div class="section-card">
-  <div class="eyebrow">A little about me</div><h2 id="aboutTitle">Curiosity meets creativity.</h2>
-  <p id="aboutText">I'm Heli, an aspiring engineer interested in understanding how things work and how thoughtful design can solve real-world problems. This portfolio will grow with my experiences, skills and projects.
-
-My interests include engineering, technology, problem solving and innovation.</p>
-</div></section>
-
-<section class="content-section" id="projects"><div class="section-card">
-  <div class="eyebrow">Selected work</div><h2 id="projectsTitle">Projects & ideas.</h2>
-  <p id="projectsIntro">A selection of projects, experiments and ideas.</p>
-  <div class="project-grid" id="projectGrid"></div>
-</div></section>
-
-<section class="content-section" id="contact"><div class="section-card">
-  <div class="eyebrow">Get in touch</div><h2 id="contactTitle">Let's connect.</h2>
-  <p id="contactText">Interested in a project or want to get in touch? I'd be happy to hear from you.</p>
-  <p>Email: <a id="contactEmail" href="mailto:your-email@example.com">your-email@example.com</a></p>
-</div></section>
+<main id="publicSite">
+  <section class="hero" id="home">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow" id="heroEyebrow">Engineering portfolio</div>
+        <h1 id="heroTitle">Heli<br><span>Patel.</span></h1>
+        <p class="hero-copy" id="heroIntro">An aspiring engineer, curious thinker and creative problem solver. Welcome to my portfolio — a space for my ideas, projects and progress.</p>
+        <a href="#projects"><button class="btn gold">Explore my work ↗</button></a>
+      </div>
+      <nav class="nav-tiles" aria-label="Main navigation">
+        <a class="nav-tile" href="#home"><small>01 / WELCOME</small><strong>Home</strong><span class="arrow">↗</span></a>
+        <a class="nav-tile" href="#about"><small>02 / MY STORY</small><strong>About</strong><span class="arrow">↗</span></a>
+        <a class="nav-tile" href="#projects"><small>03 / WHAT I DO</small><strong>Projects</strong><span class="arrow">↗</span></a>
+        <a class="nav-tile" href="#contact"><small>04 / SAY HELLO</small><strong>Contact</strong><span class="arrow">↗</span></a>
+      </nav>
+    </div>
+  </section>
+  <section class="page-section" id="about"><div class="section-shell">
+    <div class="eyebrow" id="aboutEyebrow">A little about me</div><h2 id="aboutTitle">Curiosity meets creativity.</h2>
+    <p id="aboutText">I'm Heli, an aspiring engineer interested in understanding how things work and how thoughtful design can solve real-world problems. This portfolio will grow with my experiences, skills and projects.\n\nMy interests include engineering, technology, problem solving and innovation.</p>
+  </div></section>
+  <section class="page-section" id="projects"><div class="section-shell">
+    <div class="eyebrow" id="projectsEyebrow">Selected work</div><h2 id="projectsTitle">Projects & ideas.</h2>
+    <p id="projectsIntro">A selection of projects, experiments and ideas.</p><div class="project-grid" id="projectGrid"></div>
+  </div></section>
+  <section class="page-section" id="contact"><div class="section-shell">
+    <div class="eyebrow" id="contactEyebrow">Get in touch</div><h2 id="contactTitle">Let's connect.</h2>
+    <p id="contactText">Interested in a project or want to get in touch? I'd be happy to hear from you.</p>
+    <p>Email: <a id="contactEmail" href="mailto:your-email@example.com">your-email@example.com</a></p>
+  </div></section>
 </main>
 <footer id="footerText">Designed with curiosity · Heli Patel</footer>
 
+<div id="editor">
+  <div class="editor-top">
+    <strong>✦ Portfolio studio <span style="font-weight:400;color:#766b7e">— design your pages visually</span></strong>
+    <div class="right">
+      <button id="undoButton">↶ Undo</button><button id="redoButton">↷ Redo</button>
+      <button id="previewButton">Preview site</button><button class="primary" id="saveButton">Save to Supabase</button>
+      <button id="closeEditorButton">Close editor</button>
+    </div>
+  </div>
+  <div class="editor-layout">
+    <aside class="panel">
+      <h3>Add elements</h3>
+      <div class="tool-grid">
+        <button class="tool-btn" id="addHeading">＋ Heading</button>
+        <button class="tool-btn" id="addText">＋ Text</button>
+        <button class="tool-btn" id="addRect">□ Rectangle</button>
+        <button class="tool-btn" id="addCircle">○ Circle</button>
+        <button class="tool-btn" id="addLine">／ Line</button>
+        <button class="tool-btn" id="addImage">▧ Image</button>
+        <button class="tool-btn wide" id="addProject">＋ Project card</button>
+      </div>
+      <input id="imageInput" type="file" accept="image/*" hidden>
+      <h3 style="margin-top:20px">Page</h3>
+      <div class="page-tabs">
+        <button class="page-tab active" data-page="home">Home</button>
+        <button class="page-tab" data-page="about">About</button>
+        <button class="page-tab" data-page="projects">Projects</button>
+        <button class="page-tab" data-page="contact">Contact</button>
+      </div>
+      <label for="pageBackground">Page background</label><input type="color" id="pageBackground" value="#fffaf5">
+      <div class="mini-actions">
+        <button id="addPageButton">＋ Add page</button><button id="resetPageButton">Reset page</button>
+      </div>
+      <h3 style="margin-top:20px">Arrange</h3>
+      <div class="tool-grid">
+        <button class="tool-btn" id="bringFront">Bring forward</button>
+        <button class="tool-btn" id="sendBack">Send backward</button>
+        <button class="tool-btn" id="duplicateObject">Duplicate</button>
+        <button class="tool-btn" id="deleteObject">Delete</button>
+        <button class="tool-btn" id="lockObject">Lock / unlock</button>
+        <button class="tool-btn" id="copyObject">Copy</button>
+        <button class="tool-btn wide" id="pasteObject">Paste</button>
+      </div>
+      <p class="canvas-help">Select an item on the canvas to move, resize or rotate it. Use the handles around the selected item.</p>
+      <div class="status" id="editorStatus">Ready. Changes are not saved until you select Save to Supabase.</div>
+    </aside>
+
+    <section>
+      <div class="page-tabs" style="justify-content:space-between;align-items:center">
+        <strong style="font-size:13px;color:#51445c">Design canvas</strong>
+        <span style="font-size:11px;color:#766b7e">Landscape page · 1100 × 650</span>
+      </div>
+      <div class="canvas-wrap"><div class="canvas-frame"><canvas id="editorCanvas" width="1100" height="650"></canvas></div></div>
+      <p class="canvas-help">Tip: click an item to select it. Drag to move; use corner handles to resize and the top handle to rotate. On a phone, use the properties panel below the canvas.</p>
+    </section>
+
+    <aside class="panel properties-panel">
+      <div>
+        <h3>Selected element</h3>
+        <label for="objectText">Text / content</label><textarea id="objectText" rows="3" placeholder="Select a text element"></textarea>
+        <label for="fontFamily">Font</label><select id="fontFamily"><option>Arial</option><option>Georgia</option><option>Times New Roman</option><option>Verdana</option><option>Trebuchet MS</option><option>Courier New</option></select>
+        <div class="row-fields">
+          <div><label for="fontSize">Font size</label><input type="number" id="fontSize" min="8" max="150" value="36"></div>
+          <div><label for="textAlign">Alignment</label><select id="textAlign"><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option></select></div>
+        </div>
+        <div class="mini-actions">
+          <button id="boldText">Bold</button><button id="italicText">Italic</button><button id="underlineText">Underline</button>
+        </div>
+      </div>
+      <div>
+        <h3>Appearance & position</h3>
+        <div class="row-fields">
+          <div><label for="fillColor">Fill / text colour</label><input type="color" id="fillColor" value="#393044"></div>
+          <div><label for="strokeColor">Outline colour</label><input type="color" id="strokeColor" value="#c5a15b"></div>
+          <div><label for="strokeWidth">Outline width</label><input type="number" id="strokeWidth" min="0" max="30" value="0"></div>
+          <div><label for="opacity">Opacity</label><input type="range" id="opacity" min="0.1" max="1" step="0.05" value="1"></div>
+          <div><label for="objectX">X position</label><input type="number" id="objectX"></div>
+          <div><label for="objectY">Y position</label><input type="number" id="objectY"></div>
+          <div><label for="objectWidth">Width</label><input type="number" id="objectWidth" min="5"></div>
+          <div><label for="objectHeight">Height</label><input type="number" id="objectHeight" min="5"></div>
+          <div><label for="objectAngle">Rotation °</label><input type="number" id="objectAngle"></div>
+        </div>
+        <label><input type="checkbox" id="animateObject"> Gentle floating animation on published page</label>
+        <label><input type="checkbox" id="lockToggle"> Lock selected element</label>
+      </div>
+      <div>
+        <h3>Layers</h3><div id="layerList"><span style="font-size:11px;color:#766b7e">No elements yet</span></div>
+        <div class="mini-actions"><button id="moveUp">Move up</button><button id="moveDown">Move down</button></div>
+        <h3 style="margin-top:18px">Page details</h3>
+        <label for="pageTitle">Page heading</label><input id="pageTitle" placeholder="Page title">
+        <label for="pageSubtitle">Small introduction</label><textarea id="pageSubtitle" rows="2" placeholder="Short introduction"></textarea>
+        <p class="canvas-help">The canvas is your free-design area. Page heading and introduction are also used in the published page navigation and accessibility labels.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="loginModal"><div class="modal">
-  <h2>Admin login</h2><p>Sign in to edit your portfolio.</p>
+  <h2>Admin login</h2><p>Sign in with your authorised Supabase account to edit your portfolio.</p>
   <form id="loginForm">
-    <label for="email">Admin email</label><input id="email" type="email" required>
-    <label for="password">Password</label><input id="password" type="password" required>
+    <label for="email">Email address</label><input id="email" type="email" required autocomplete="username">
+    <label for="password">Password</label><input id="password" type="password" required autocomplete="current-password">
     <button class="btn gold" style="width:100%" type="submit">Sign in</button>
   </form>
-  <p id="loginMessage"></p><button class="btn soft" id="closeLogin">Cancel</button>
+  <p id="loginMessage"></p><button class="btn ghost" id="closeLogin">Cancel</button>
 </div></div>
-
-<div class="modal-backdrop" id="editModal"><div class="modal">
-  <h2>Edit your portfolio</h2>
-  <p>Changes are saved to your new Supabase record (ID 2).</p>
-  <form id="editForm">
-    <label>Home introduction</label><textarea id="fHeroIntro" rows="3"></textarea>
-    <label>About heading</label><input id="fAboutTitle">
-    <label>About text</label><textarea id="fAboutText" rows="5"></textarea>
-    <label>Projects heading</label><input id="fProjectsTitle">
-    <label>Projects introduction</label><textarea id="fProjectsIntro" rows="2"></textarea>
-    <label>Project 1 title</label><input id="fP1Title">
-    <label>Project 1 description</label><textarea id="fP1Text" rows="3"></textarea>
-    <label>Project 2 title</label><input id="fP2Title">
-    <label>Project 2 description</label><textarea id="fP2Text" rows="3"></textarea>
-    <label>Project 3 title</label><input id="fP3Title">
-    <label>Project 3 description</label><textarea id="fP3Text" rows="3"></textarea>
-    <label>Contact heading</label><input id="fContactTitle">
-    <label>Contact text</label><textarea id="fContactText" rows="3"></textarea>
-    <label>Contact email</label><input id="fEmail" type="email">
-    <button class="btn gold" type="submit" style="width:100%">Save changes</button>
-  </form>
-  <p id="editMessage"></p><button class="btn soft" id="closeEdit">Close</button>
-</div></div>
+<div id="toast" role="status"></div>
 
 <script>
-/* Supabase connection */
+/* ---------- CONNECTION SETTINGS ---------- */
 const SUPABASE_URL = "https://uwfjsvjwwgbupfxwznvg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Sul7wobHWlqCl0x7tT4YUw_V3afz6Wx";
 const PORTFOLIO_RECORD_ID = 2;
-const ADMIN_USER_ID = "e37c2a47-8371-481a-ab2d-149039d625a9";
+const ADMIN_UID = "e37c2a47-8371-481a-ab2d-149039d625a9";
+const CANVAS_W = 1100, CANVAS_H = 650;
+
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const $ = id => document.getElementById(id);
+let isAdmin = false, editorOpen = false, currentPage = "home";
+let siteData = defaultData();
+let canvas = null, history = [], historyIndex = -1, restoring = false, clipboardObject = null;
+let saveTimer = null;
 
-const defaults = {
-  heroIntro:"An aspiring engineer, curious thinker and creative problem solver. Welcome to my portfolio — a space for my ideas, projects and progress.",
-  aboutTitle:"Curiosity meets creativity.",
-  aboutText:"I'm Heli, an aspiring engineer interested in understanding how things work and how thoughtful design can solve real-world problems. This portfolio will grow with my experiences, skills and projects.\n\nMy interests include engineering, technology, problem solving and innovation.",
-  projectsTitle:"Projects & ideas.",
-  projectsIntro:"A selection of projects, experiments and ideas.",
-  projects:[
-    {title:"Smart T.R.A.C.S.",text:"An AI-powered traffic management concept focused on improving road safety and efficiency."},
-    {title:"Project two",text:"A space to showcase another engineering project, including the problem, process and outcome."},
-    {title:"Project three",text:"More experiments, designs and ideas will appear here."}
-  ],
-  contactTitle:"Let's connect.",
-  contactText:"Interested in a project or want to get in touch? I'd be happy to hear from you.",
-  email:"your-email@example.com"
-};
-let content = structuredClone(defaults);
-let isAdmin = false;
+function defaultData(){
+  const pages = {};
+  ["home","about","projects","contact"].forEach((name,i)=>{
+    pages[name] = {title:["Home","About","Projects","Contact"][i],subtitle:["Welcome to my portfolio","A little about me","Selected work","Get in touch"][i],background:["#fffaf5","#fffdfb","#fffaf5","#fffdfb"][i],objects:[]};
+  });
+  pages.home.objects = [
+    {type:"textbox",text:"HELI PATEL",left:105,top:125,width:650,fontSize:72,fontFamily:"Georgia",fontWeight:"bold",fill:"#393044"},
+    {type:"textbox",text:"Engineering portfolio",left:112,top:225,width:560,fontSize:25,fontFamily:"Arial",fill:"#c5a15b"},
+    {type:"textbox",text:"An aspiring engineer, curious thinker and creative problem solver. A space for my ideas, projects and progress.",left:112,top:285,width:570,fontSize:25,fontFamily:"Arial",fill:"#766d7e"}
+  ];
+  pages.about.objects = [
+    {type:"textbox",text:"Curiosity meets creativity.",left:100,top:110,width:850,fontSize:52,fontFamily:"Georgia",fontWeight:"bold",fill:"#393044"},
+    {type:"textbox",text:"I'm Heli, an aspiring engineer interested in understanding how things work and how thoughtful design can solve real-world problems. This portfolio will grow with my experiences, skills and projects.\\n\\nMy interests include engineering, technology, problem solving and innovation.",left:105,top:220,width:850,fontSize:26,fontFamily:"Arial",fill:"#766d7e"}
+  ];
+  pages.projects.objects = [
+    {type:"textbox",text:"Projects & ideas.",left:95,top:70,width:850,fontSize:54,fontFamily:"Georgia",fontWeight:"bold",fill:"#393044"},
+    {type:"textbox",text:"Smart T.R.A.C.S.",left:100,top:190,width:400,fontSize:34,fontFamily:"Arial",fontWeight:"bold",fill:"#393044"},
+    {type:"textbox",text:"An AI-powered traffic management concept focused on improving road safety and efficiency.",left:100,top:245,width:850,fontSize:24,fontFamily:"Arial",fill:"#766d7e"},
+    {type:"rect",left:90,top:350,width:900,height:150,fill:"#eee8f8",rx:20,ry:20,selectable:true},
+    {type:"textbox",text:"More projects, experiments and ideas will appear here.",left:120,top:395,width:800,fontSize:25,fontFamily:"Arial",fill:"#393044"}
+  ];
+  pages.contact.objects = [
+    {type:"textbox",text:"Let's connect.",left:100,top:120,width:850,fontSize:60,fontFamily:"Georgia",fontWeight:"bold",fill:"#393044"},
+    {type:"textbox",text:"Interested in a project or want to get in touch? I'd be happy to hear from you.",left:105,top:230,width:850,fontSize:28,fontFamily:"Arial",fill:"#766d7e"}
+  ];
+  return {version:2,theme:"light",pages,extraPages:[],contactEmail:"your-email@example.com",footer:"Designed with curiosity · Heli Patel"};
+}
+function toast(message){$("toast").textContent=message;$("toast").style.display="block";clearTimeout(toast.timer);toast.timer=setTimeout(()=>$("toast").style.display="none",3300)}
+function status(message){$("editorStatus").textContent=message}
+function pageData(){return siteData.pages[currentPage]}
 
-function render(){
-  document.getElementById("heroIntro").textContent=content.heroIntro;
-  document.getElementById("aboutTitle").textContent=content.aboutTitle;
-  document.getElementById("aboutText").textContent=content.aboutText;
-  document.getElementById("projectsTitle").textContent=content.projectsTitle;
-  document.getElementById("projectsIntro").textContent=content.projectsIntro;
-  document.getElementById("contactTitle").textContent=content.contactTitle;
-  document.getElementById("contactText").textContent=content.contactText;
-  const email=document.getElementById("contactEmail");
-  email.textContent=content.email;email.href="mailto:"+content.email;
-  const grid=document.getElementById("projectGrid");grid.innerHTML="";
-  content.projects.forEach(p=>{
-    const card=document.createElement("article");card.className="project";
-    const h=document.createElement("h3");h.textContent=p.title;
-    const para=document.createElement("p");para.textContent=p.text;
-    card.append(h,para);grid.appendChild(card);
+function fabricObjectFromJSON(o){
+  const common={left:o.left,top:o.top,width:o.width,fill:o.fill,stroke:o.stroke,strokeWidth:o.strokeWidth,opacity:o.opacity,angle:o.angle,fontSize:o.fontSize,fontFamily:o.fontFamily,fontWeight:o.fontWeight,fontStyle:o.fontStyle,underline:o.underline,textAlign:o.textAlign,rx:o.rx,ry:o.ry,selectable:true,evented:true};
+  let obj;
+  if(o.type==="textbox") obj=new fabric.Textbox(o.text||"Text",common);
+  else if(o.type==="rect") obj=new fabric.Rect({...common,height:o.height,rx:o.rx||0,ry:o.ry||0});
+  else if(o.type==="circle") obj=new fabric.Circle({...common,radius:o.radius||55});
+  else if(o.type==="line") obj=new fabric.Line([o.x1||0,o.y1||0,o.x2||180,o.y2||0],{...common,fill:"",stroke:o.stroke||o.fill||"#c5a15b",strokeWidth:o.strokeWidth||4});
+  else if(o.type==="image" && o.src) return new Promise(resolve=>fabric.Image.fromURL(o.src,img=>{if(!img){resolve(null);return;}img.set({left:o.left,top:o.top,scaleX:o.scaleX||1,scaleY:o.scaleY||1,opacity:o.opacity||1});img.customType="image";img._editorData={...o};resolve(img);},{crossOrigin:"anonymous"}));
+  else return null;
+  obj.customType=o.type;obj._editorData={...o};if(o.locked)setObjectLocked(obj,true);if(o.animate)obj.animateOnView=true;
+  return obj;
+}
+function objectToJSON(o){
+  const t=o.customType|| (o.type==="textbox"?"textbox":o.type);
+  const base={type:t,left:o.left||0,top:o.top||0,fill:o.fill||"#393044",stroke:o.stroke||"",strokeWidth:o.strokeWidth||0,opacity:o.opacity==null?1:o.opacity,angle:o.angle||0,locked:!!o.locked,animate:!!o.animateOnView};
+  if(t==="textbox"||o.type==="textbox"){Object.assign(base,{type:"textbox",text:o.text||"",width:o.width||300,fontSize:o.fontSize||28,fontFamily:o.fontFamily||"Arial",fontWeight:o.fontWeight||"normal",fontStyle:o.fontStyle||"normal",underline:!!o.underline,textAlign:o.textAlign||"left"});}
+  if(t==="rect"){Object.assign(base,{width:o.width||160,height:o.height||100,rx:o.rx||0,ry:o.ry||0});}
+  if(t==="circle"){Object.assign(base,{radius:o.radius||55});}
+  if(t==="line"){Object.assign(base,{x1:o.x1||0,y1:o.y1||0,x2:o.x2||180,y2:o.y2||0,stroke:o.stroke||o.fill||"#c5a15b",strokeWidth:o.strokeWidth||4});}
+  if(t==="image"){Object.assign(base,{type:"image",src:o._editorData?.src||o.src||"",scaleX:o.scaleX||1,scaleY:o.scaleY||1});}
+  return base;
+}
+function setObjectLocked(obj,locked){
+  obj.locked=locked;obj.selectable=!locked;obj.evented=!locked;
+  obj.lockMovementX=locked;obj.lockMovementY=locked;obj.lockScalingX=locked;obj.lockScalingY=locked;obj.lockRotation=locked;
+}
+async function renderPageToCanvas(data,target,interactive=false){
+  const c=new fabric.StaticCanvas(target,{backgroundColor:data.background||"#fffaf5",renderOnAddRemove:false});
+  for(const raw of (data.objects||[])){let obj=await fabricObjectFromJSON(raw);if(obj)c.add(obj);}
+  c.renderAll();return c;
+}
+function renderPublicSite(){
+  const pages=siteData.pages||{};
+  document.body.classList.toggle("dark",siteData.theme==="dark");
+  const home=pages.home||defaultData().pages.home;
+  const homeTitle=(home.objects||[]).find(o=>o.type==="textbox")?.text||"HELI PATEL";
+  $("heroTitle").textContent=homeTitle;
+  $("heroEyebrow").textContent=home.subtitle||"Engineering portfolio";
+  $("heroIntro").textContent="An aspiring engineer, curious thinker and creative problem solver. Welcome to my portfolio — a space for my ideas, projects and progress.";
+  const map=[["about","about"],["projects","projects"],["contact","contact"]];
+  map.forEach(([key,id])=>{
+    const p=pages[key]||{};
+    $(id+"Title").textContent=p.title||({about:"Curiosity meets creativity.",projects:"Projects & ideas.",contact:"Let's connect."}[key]);
+    $(id+"Eyebrow").textContent=p.subtitle||"";
+    const texts=(p.objects||[]).filter(o=>o.type==="textbox").map(o=>o.text).filter(Boolean);
+    if(key==="about")$("aboutText").textContent=texts.slice(1).join("\n\n")||"";
+    if(key==="projects"){
+      $("projectsIntro").textContent="Explore selected projects, experiments and ideas.";
+      $("projectGrid").innerHTML="";
+      (p.objects||[]).filter(o=>o.type==="textbox").slice(1).forEach(o=>{
+        const card=document.createElement("article");card.className="project-card";
+        const h=document.createElement("h3");h.textContent=o.text.split("\n")[0];card.appendChild(h);
+        const para=document.createElement("p");para.textContent=o.text.includes("\n")?o.text.split("\n").slice(1).join("\n"):"";card.appendChild(para);
+        $("projectGrid").appendChild(card);
+      });
+    }
+    if(key==="contact")$("contactText").textContent=texts.slice(1).join("\n\n")||"";
+  });
+  $("contactEmail").textContent=siteData.contactEmail||"your-email@example.com";
+  $("contactEmail").href="mailto:"+(siteData.contactEmail||"your-email@example.com");
+  $("footerText").textContent=siteData.footer||"Designed with curiosity · Heli Patel";
+  // If a user has designed a page in the editor, show the saved design as a canvas preview below its standard section.
+  document.querySelectorAll(".custom-page-preview").forEach(e=>e.remove());
+  ["about","projects","contact"].forEach(key=>{
+    const p=pages[key];if(!p||!p.objects||!p.objects.length)return;
+    const section=$(key);const shell=section.querySelector(".section-shell");
+    const preview=document.createElement("div");preview.className="custom-page-preview";preview.style.cssText="max-width:1120px;margin:18px auto 0;background:"+ (p.background||"#fffaf5")+";border-radius:22px;overflow:hidden;box-shadow:var(--shadow)";
+    const c=document.createElement("canvas");c.className="viewer-canvas";c.width=CANVAS_W;c.height=CANVAS_H;preview.appendChild(c);section.appendChild(preview);
+    renderPageToCanvas(p,c,false).then(sc=>{sc.dispose();if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){(p.objects||[]).forEach((o,i)=>{if(o.animate){const el=c.parentElement;el.animate([{transform:"translateY(0)"},{transform:"translateY(-5px)"},{transform:"translateY(0)"}],{duration:2600+i*150,iterations:Infinity});}}}});
   });
 }
-async function loadContent(){
-  const {data,error}=await db.from("site_content").select("content").eq("id",PORTFOLIO_RECORD_ID).maybeSingle();
-  if(error){console.error(error);return}
-  if(data && data.content){content={...structuredClone(defaults),...data.content};if(!Array.isArray(content.projects))content.projects=structuredClone(defaults.projects)}
-  render();
+function initialiseCanvas(){
+  if(canvas){canvas.dispose();canvas=null;}
+  canvas=new fabric.Canvas("editorCanvas",{backgroundColor:pageData().background||"#fffaf5",preserveObjectStacking:true,selection:true});
+  canvas.setWidth(CANVAS_W);canvas.setHeight(CANVAS_H);
+  canvas.on("selection:created",updateProperties);canvas.on("selection:updated",updateProperties);canvas.on("selection:cleared",clearProperties);
+  canvas.on("object:modified",()=>{updateProperties();recordHistory();});
+  canvas.on("object:added",()=>{if(!restoring)refreshLayers();});
+  canvas.on("object:removed",()=>{if(!restoring)refreshLayers();});
+  loadPageObjects();
 }
-async function saveContent(){
-  const {data,error}=await db.from("site_content").update({content:content,updated_at:new Date().toISOString()}).eq("id",PORTFOLIO_RECORD_ID).select("id").maybeSingle();
-  if(error){document.getElementById("editMessage").textContent="Save failed: "+error.message;return}
-  if(!data){document.getElementById("editMessage").textContent="No row was updated. Check that record ID 2 exists and database permissions allow saving.";return}
-  document.getElementById("editMessage").textContent="Saved successfully!";
+async function loadPageObjects(){
+  restoring=true;canvas.clear();canvas.backgroundColor=pageData().background||"#fffaf5";
+  for(const raw of (pageData().objects||[])){const obj=await fabricObjectFromJSON(raw);if(obj)canvas.add(obj);}
+  canvas.renderAll();restoring=false;refreshLayers();clearProperties();$("pageBackground").value=pageData().background||"#fffaf5";$("pageTitle").value=pageData().title||"";$("pageSubtitle").value=pageData().subtitle||"";
+  recordHistory(true);
+}
+function saveCanvasToPage(){if(!canvas)return;pageData().objects=canvas.getObjects().map(objectToJSON);pageData().background=canvas.backgroundColor||"#fffaf5";}
+function recordHistory(initial=false){
+  if(!canvas||restoring)return;saveCanvasToPage();
+  const snap=JSON.stringify({objects:pageData().objects,background:pageData().background});
+  if(historyIndex>=0&&history[historyIndex]===snap)return;
+  history=history.slice(0,historyIndex+1);history.push(snap);if(history.length>60)history.shift();historyIndex=history.length-1;
+  $("undoButton").disabled=historyIndex<=0;$("redoButton").disabled=historyIndex>=history.length-1;
+}
+async function restoreHistory(index){
+  if(index<0||index>=history.length)return;
+  historyIndex=index;const snap=JSON.parse(history[index]);pageData().objects=snap.objects;pageData().background=snap.background;
+  restoring=true;canvas.clear();canvas.backgroundColor=snap.background;
+  for(const raw of snap.objects){const obj=await fabricObjectFromJSON(raw);if(obj)canvas.add(obj);}
+  canvas.renderAll();restoring=false;refreshLayers();clearProperties();
+  $("undoButton").disabled=historyIndex<=0;$("redoButton").disabled=historyIndex>=history.length-1;
+}
+function addObject(obj){canvas.add(obj);canvas.setActiveObject(obj);canvas.requestRenderAll();updateProperties();recordHistory();}
+function addText(text,size=32,top=100){addObject(new fabric.Textbox(text,{left:100,top,width:800,fontSize:size,fontFamily:"Arial",fill:"#393044",fontWeight:"normal"}));}
+function active(){return canvas?.getActiveObject();}
+function refreshLayers(){
+  const list=$("layerList");if(!canvas||!canvas.getObjects().length){list.innerHTML='<span style="font-size:11px;color:#766b7e">No elements yet</span>';return;}
+  list.innerHTML="";
+  [...canvas.getObjects()].reverse().forEach((obj,reverseIndex)=>{
+    const realIndex=canvas.getObjects().length-1-reverseIndex;
+    const b=document.createElement("button");b.className="layer-item"+(active()===obj?" selected":"");
+    b.textContent=(obj.locked?"🔒 ":"")+(obj.type==="textbox"?(obj.text||"Text").slice(0,32):obj.customType||obj.type);
+    b.title=b.textContent;b.onclick=()=>{canvas.setActiveObject(obj);canvas.requestRenderAll();updateProperties();refreshLayers();};
+    list.appendChild(b);
+  });
+}
+function updateProperties(){
+  const o=active();if(!o)return;
+  $("objectText").value=o.type==="textbox"?o.text:"";
+  $("fontFamily").value=o.fontFamily||"Arial";$("fontSize").value=o.fontSize||32;$("textAlign").value=o.textAlign||"left";
+  $("fillColor").value=toHex(o.fill)||"#393044";$("strokeColor").value=toHex(o.stroke)||"#c5a15b";
+  $("strokeWidth").value=o.strokeWidth||0;$("opacity").value=o.opacity==null?1:o.opacity;
+  $("objectX").value=Math.round(o.left||0);$("objectY").value=Math.round(o.top||0);
+  $("objectWidth").value=Math.round(o.getScaledWidth());$("objectHeight").value=Math.round(o.getScaledHeight());$("objectAngle").value=Math.round(o.angle||0);
+  $("animateObject").checked=!!o.animateOnView;$("lockToggle").checked=!!o.locked;
+  refreshLayers();
+}
+function clearProperties(){["objectText"].forEach(id=>$(id).value="");}
+function toHex(value){if(typeof value!=="string"||!value.startsWith("#"))return null;return value.length===4?"#"+value[1]+value[1]+value[2]+value[2]+value[3]+value[3]:value.slice(0,7);}
+function updateActive(fn){const o=active();if(!o)return;fn(o);o.setCoords();canvas.requestRenderAll();updateProperties();recordHistory();}
+function switchPage(name){
+  saveCanvasToPage();currentPage=name;
+  document.querySelectorAll(".page-tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
+  loadPageObjects();status("Editing "+name+" page.");
 }
 function openEditor(){
-  document.getElementById("fHeroIntro").value=content.heroIntro;
-  document.getElementById("fAboutTitle").value=content.aboutTitle;
-  document.getElementById("fAboutText").value=content.aboutText;
-  document.getElementById("fProjectsTitle").value=content.projectsTitle;
-  document.getElementById("fProjectsIntro").value=content.projectsIntro;
-  document.getElementById("fP1Title").value=content.projects[0]?.title||"";
-  document.getElementById("fP1Text").value=content.projects[0]?.text||"";
-  document.getElementById("fP2Title").value=content.projects[1]?.title||"";
-  document.getElementById("fP2Text").value=content.projects[1]?.text||"";
-  document.getElementById("fP3Title").value=content.projects[2]?.title||"";
-  document.getElementById("fP3Text").value=content.projects[2]?.text||"";
-  document.getElementById("fContactTitle").value=content.contactTitle;
-  document.getElementById("fContactText").value=content.contactText;
-  document.getElementById("fEmail").value=content.email;
-  document.getElementById("editMessage").textContent="";
-  document.getElementById("editModal").style.display="flex";
+  editorOpen=true;$("editor").style.display="block";$("adminBar").style.display="flex";initialiseCanvas();$("editor").scrollIntoView({behavior:"smooth",block:"start"});
 }
-document.getElementById("loginButton").onclick=()=>document.getElementById("loginModal").style.display="flex";
-document.getElementById("closeLogin").onclick=()=>document.getElementById("loginModal").style.display="none";
-document.getElementById("closeEdit").onclick=()=>document.getElementById("editModal").style.display="none";
-document.getElementById("editButton").onclick=openEditor;
-document.getElementById("logoutButton").onclick=async()=>{await db.auth.signOut();isAdmin=false;document.getElementById("adminBar").style.display="none";document.getElementById("loginButton").style.display="inline-block"};
-document.getElementById("loginForm").onsubmit=async e=>{
-  e.preventDefault();const msg=document.getElementById("loginMessage");msg.textContent="Signing in…";
-  const {data,error}=await db.auth.signInWithPassword({email:document.getElementById("email").value,password:document.getElementById("password").value});
-  if(error){msg.textContent=error.message;return}
-  if(data.user.id!==ADMIN_USER_ID){await db.auth.signOut();msg.textContent="This account is not authorised as the portfolio administrator.";return}
-  isAdmin=true;document.getElementById("loginModal").style.display="none";document.getElementById("adminBar").style.display="flex";document.getElementById("loginButton").style.display="none";
+function closeEditor(){saveCanvasToPage();$("editor").style.display="none";editorOpen=false;renderPublicSite();window.scrollTo({top:0,behavior:"smooth"});}
+function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){$("editor").style.display="none";editorOpen=false;}}
+async function loadContent(){
+  const {data,error}=await db.from("site_content").select("content").eq("id",PORTFOLIO_RECORD_ID).maybeSingle();
+  if(error){console.warn(error);toast("Could not load Supabase content. Showing the starter portfolio.");return;}
+  if(data&&data.content){const incoming=data.content;if(incoming.pages)siteData={...defaultData(),...incoming};else if(incoming.elements||incoming.pageSettings){siteData=defaultData();} }
+  renderPublicSite();
+}
+async function saveContent(){
+  if(!isAdmin){toast("Please sign in as the portfolio administrator.");return;}
+  saveCanvasToPage();
+  const {data,error}=await db.from("site_content").update({content:siteData,updated_at:new Date().toISOString()}).eq("id",PORTFOLIO_RECORD_ID).select("id").maybeSingle();
+  if(error){console.error(error);status("Save failed: "+error.message);toast("Save failed. Check the Supabase row and table permissions.");return;}
+  if(!data){status("No row with ID 2 was updated. Create site_content row ID 2 first.");toast("Supabase row ID 2 was not found.");return;}
+  status("Saved successfully to Supabase at "+new Date().toLocaleTimeString()+".");toast("Your portfolio has been saved.");
+  renderPublicSite();
+}
+async function checkSession(){
+  const {data}=await db.auth.getSession();const user=data?.session?.user;
+  setEditorEnabled(!!user&&user.id===ADMIN_UID);
+  if(user&&user.id!==ADMIN_UID){await db.auth.signOut();toast("This account is not authorised to edit this portfolio.");}
+}
+function addNewPage(){
+  const name=prompt("Name this page (use a short name, e.g. Skills):");if(!name)return;
+  const key=name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  if(!key||siteData.pages[key]){toast("That page already exists or the name is not valid.");return;}
+  siteData.pages[key]={title:name,subtitle:"New page",background:"#fffaf5",objects:[]};
+  const b=document.createElement("button");b.className="page-tab";b.dataset.page=key;b.textContent=name;b.onclick=()=>switchPage(key);document.querySelector(".page-tabs").appendChild(b);
+  switchPage(key);toast("Page added. Save to Supabase to keep it.");
+}
+
+/* ---------- TOOLBAR ACTIONS ---------- */
+$("addHeading").onclick=()=>addText("Your heading",48,100);
+$("addText").onclick=()=>addText("Write something here...",27,180);
+$("addRect").onclick=()=>addObject(new fabric.Rect({left:130,top:150,width:260,height:150,fill:"#eee8f8",rx:18,ry:18}));
+$("addCircle").onclick=()=>addObject(new fabric.Circle({left:180,top:150,radius:65,fill:"#f4dce9"}));
+$("addLine").onclick=()=>addObject(new fabric.Line([100,100,400,100],{left:100,top:100,stroke:"#c5a15b",strokeWidth:5}));
+$("addProject").onclick=()=>{addObject(new fabric.Rect({left:90,top:170,width:420,height:280,fill:"#eee8f8",rx:22,ry:22}));addObject(new fabric.Textbox("Project title\nAdd a description of the problem, your process and the outcome.",{left:120,top:205,width:360,fontSize:26,fontFamily:"Arial",fill:"#393044"}));};
+$("addImage").onclick=()=>$("imageInput").click();
+$("imageInput").onchange=e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  if(file.size>1200000){toast("Please choose an image under 1.2 MB so it can be stored in your portfolio record.");e.target.value="";return;}
+  const reader=new FileReader();reader.onload=()=>{
+    fabric.Image.fromURL(reader.result,img=>{img.scaleToWidth(Math.min(420,img.width));img.set({left:100,top:100});img.customType="image";img._editorData={type:"image",src:reader.result,left:100,top:100,scaleX:img.scaleX,scaleY:img.scaleY};addObject(img);},{crossOrigin:"anonymous"});
+  };reader.readAsDataURL(file);e.target.value="";
 };
-document.getElementById("editForm").onsubmit=async e=>{
-  e.preventDefault();if(!isAdmin)return;
-  content={
-    heroIntro:document.getElementById("fHeroIntro").value,
-    aboutTitle:document.getElementById("fAboutTitle").value,
-    aboutText:document.getElementById("fAboutText").value,
-    projectsTitle:document.getElementById("fProjectsTitle").value,
-    projectsIntro:document.getElementById("fProjectsIntro").value,
-    projects:[
-      {title:document.getElementById("fP1Title").value,text:document.getElementById("fP1Text").value},
-      {title:document.getElementById("fP2Title").value,text:document.getElementById("fP2Text").value},
-      {title:document.getElementById("fP3Title").value,text:document.getElementById("fP3Text").value}
-    ],
-    contactTitle:document.getElementById("fContactTitle").value,
-    contactText:document.getElementById("fContactText").value,
-    email:document.getElementById("fEmail").value
-  };
-  render();await saveContent();
+$("pageBackground").oninput=e=>{canvas.backgroundColor=e.target.value;canvas.requestRenderAll();pageData().background=e.target.value;recordHistory();};
+$("pageTitle").onchange=e=>{pageData().title=e.target.value;};
+$("pageSubtitle").onchange=e=>{pageData().subtitle=e.target.value;};
+$("addPageButton").onclick=addNewPage;
+$("resetPageButton").onclick=()=>{if(confirm("Remove all elements from this page? This will not affect other pages.")){canvas.clear();canvas.backgroundColor="#fffaf5";pageData().objects=[];pageData().background="#fffaf5";recordHistory();refreshLayers();}};
+document.querySelectorAll(".page-tab[data-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
+$("undoButton").onclick=()=>restoreHistory(historyIndex-1);
+$("redoButton").onclick=()=>restoreHistory(historyIndex+1);
+$("bringFront").onclick=()=>updateActive(o=>canvas.bringToFront(o));
+$("sendBack").onclick=()=>updateActive(o=>canvas.sendBackwards(o));
+$("moveUp").onclick=()=>$("bringFront").click();
+$("moveDown").onclick=()=>$("sendBack").click();
+$("deleteObject").onclick=()=>{const o=active();if(o){canvas.remove(o);canvas.discardActiveObject();canvas.requestRenderAll();recordHistory();clearProperties();refreshLayers();}};
+$("duplicateObject").onclick=()=>{const o=active();if(o)o.clone(clone=>{clone.set({left:o.left+25,top:o.top+25});clone.customType=o.customType;clone._editorData=o._editorData?{...o._editorData}:undefined;addObject(clone);});};
+$("copyObject").onclick=()=>{const o=active();if(o)o.clone(clone=>{clipboardObject=clone;toast("Element copied. Use Paste to add it.");});};
+$("pasteObject").onclick=()=>{if(clipboardObject)clipboardObject.clone(clone=>{clone.set({left:(clone.left||100)+25,top:(clone.top||100)+25});clone.customType=clipboardObject.customType;addObject(clone);});};
+$("lockObject").onclick=()=>updateActive(o=>setObjectLocked(o,!o.locked));
+$("lockToggle").onchange=e=>updateActive(o=>setObjectLocked(o,e.target.checked));
+$("objectText").oninput=e=>updateActive(o=>{if(o.type==="textbox")o.set("text",e.target.value);});
+$("fontFamily").onchange=e=>updateActive(o=>{if(o.type==="textbox")o.set("fontFamily",e.target.value);});
+$("fontSize").onchange=e=>updateActive(o=>{if(o.type==="textbox")o.set("fontSize",Number(e.target.value));});
+$("textAlign").onchange=e=>updateActive(o=>{if(o.type==="textbox")o.set("textAlign",e.target.value);});
+$("fillColor").oninput=e=>updateActive(o=>{if(o.type!=="line")o.set("fill",e.target.value);else o.set("stroke",e.target.value);});
+$("strokeColor").oninput=e=>updateActive(o=>o.set("stroke",e.target.value));
+$("strokeWidth").onchange=e=>updateActive(o=>o.set("strokeWidth",Number(e.target.value)));
+$("opacity").oninput=e=>updateActive(o=>o.set("opacity",Number(e.target.value)));
+$("objectX").onchange=e=>updateActive(o=>o.set("left",Number(e.target.value)));
+$("objectY").onchange=e=>updateActive(o=>o.set("top",Number(e.target.value)));
+$("objectWidth").onchange=e=>updateActive(o=>{const w=Math.max(5,Number(e.target.value));if(o.width)o.scaleX=w/o.width;});
+$("objectHeight").onchange=e=>updateActive(o=>{const h=Math.max(5,Number(e.target.value));if(o.height)o.scaleY=h/o.height;});
+$("objectAngle").onchange=e=>updateActive(o=>o.set("angle",Number(e.target.value)));
+$("animateObject").onchange=e=>updateActive(o=>o.animateOnView=e.target.checked);
+$("boldText").onclick=()=>updateActive(o=>{if(o.type==="textbox")o.set("fontWeight",o.fontWeight==="bold"?"normal":"bold");});
+$("italicText").onclick=()=>updateActive(o=>{if(o.type==="textbox")o.set("fontStyle",o.fontStyle==="italic"?"normal":"italic");});
+$("underlineText").onclick=()=>updateActive(o=>{if(o.type==="textbox")o.set("underline",!o.underline);});
+$("previewButton").onclick=()=>{saveCanvasToPage();renderPublicSite();$("publicSite").scrollIntoView({behavior:"smooth"});};
+$("saveButton").onclick=saveContent;
+$("openEditorButton").onclick=openEditor;
+$("closeEditorButton").onclick=closeEditor;
+$("themeButton").onclick=()=>{siteData.theme=siteData.theme==="dark"?"light":"dark";document.body.classList.toggle("dark",siteData.theme==="dark");};
+$("loginButton").onclick=()=>{$("loginModal").style.display="flex";};
+$("closeLogin").onclick=()=>$("loginModal").style.display="none";
+$("loginModal").onclick=e=>{if(e.target===$("loginModal"))$("loginModal").style.display="none";};
+$("logoutButton").onclick=async()=>{await db.auth.signOut();setEditorEnabled(false);toast("You have been logged out.");};
+$("loginForm").onsubmit=async e=>{
+  e.preventDefault();$("loginMessage").textContent="Signing in…";
+  const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+  if(error){$("loginMessage").textContent=error.message;return;}
+  if(data.user.id!==ADMIN_UID){await db.auth.signOut();$("loginMessage").textContent="This account is not authorised to edit this portfolio.";return;}
+  $("loginModal").style.display="none";setEditorEnabled(true);toast("Signed in. Your visual editor is ready.");openEditor();
 };
-document.getElementById("themeButton").onclick=()=>{document.body.classList.toggle("dark");document.getElementById("themeButton").textContent=document.body.classList.contains("dark")?"☀ Light":"☾ Theme"};
-db.auth.getSession().then(async({data})=>{
-  if(data.session?.user?.id===ADMIN_USER_ID){isAdmin=true;document.getElementById("adminBar").style.display="flex";document.getElementById("loginButton").style.display="none"}
-});
-loadContent();
+db.auth.onAuthStateChange((_event,session)=>{const user=session?.user;setEditorEnabled(!!user&&user.id===ADMIN_UID);});
+window.addEventListener("beforeunload",e=>{if(editorOpen){e.preventDefault();e.returnValue="You may have unsaved portfolio changes.";}});
+
+(async()=>{await loadContent();await checkSession();})();
 </script>
 </body>
 </html>
