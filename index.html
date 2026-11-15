@@ -47,8 +47,13 @@ a{color:inherit}
 .section-shell h2{font-size:clamp(30px,4vw,44px);margin:12px 0}
 .section-shell p{color:var(--muted);line-height:1.85;white-space:pre-line}
 .project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-top:25px}
-.project-card{padding:23px;border-radius:19px;background:var(--lilac);min-height:150px}
+.project-card{padding:23px;border-radius:19px;background:var(--lilac);min-height:150px;position:relative;transition:box-shadow .15s,outline .15s;min-width:0}
 .project-card h3{margin-top:0}.project-card p{margin-bottom:0}
+.project-card-image{display:block;width:100%;max-height:250px;object-fit:cover;border-radius:13px;margin-top:18px;background:#fff9}
+.project-card.admin-selectable{cursor:pointer}
+.project-card.admin-selected{outline:3px solid #c5a15b;outline-offset:3px;box-shadow:0 8px 24px #34233d22}
+.project-card-resize{display:none;position:absolute;right:7px;bottom:7px;width:17px;height:17px;border:2px solid #fff;border-radius:4px;background:#c5a15b;cursor:nwse-resize;z-index:3}
+body.admin-editing .project-card.admin-selected .project-card-resize{display:block}
 footer{text-align:center;padding:38px 20px;color:var(--muted)}
 #adminBar{display:none;position:sticky;top:0;z-index:20;background:#30263d;color:white;padding:10px 4vw;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 #adminBar .bar-actions{display:flex;gap:7px;flex-wrap:wrap}
@@ -223,15 +228,13 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
           <button class="tool-btn wide" id="pasteObject">Paste</button>
         </div>
       </div>
-      <p class="canvas-help">Select an item on the canvas to move, resize or rotate it. Use the handles around the selected item.</p>
+      <p class="canvas-help">Select anything on the website to edit it, or add new elements directly to the page.</p>
       <div class="status" id="editorStatus">Ready. Changes are not saved until you select Save to Supabase.</div>
     </aside>
 
     <section class="editor-middle">
       <div class="workspace-tabs">
-        <button type="button" class="workspace-tab active" id="websitePreviewTab">Website preview</button>
-        <button type="button" class="workspace-tab" id="designCanvasTab">Free design canvas</button>
-        <span style="font-size:11px;color:#766b7e;margin-left:auto">Select an item on the website to edit it</span>
+        <span style="font-size:11px;color:#766b7e">Edit directly on your live website preview</span>
       </div>
       <div id="sitePreviewMount" aria-label="Live portfolio website preview"></div>
       <div id="canvasWorkspace">
@@ -248,11 +251,24 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
       <div id="directEditPanel" aria-live="polite">
         <div class="direct-edit-head"><strong>✦ Edit selected website item</strong><button type="button" id="directEditClose" aria-label="Close">×</button></div>
         <p id="directEditHint">Choose an item in the website preview to edit it.</p>
-        <label for="directEditText">Text / label</label><textarea id="directEditText" rows="3"></textarea>
-        <div class="direct-edit-grid"><div><label for="directEditBg">Background</label><input type="color" id="directEditBg"></div><div><label for="directEditColor">Text colour</label><input type="color" id="directEditColor"></div></div>
-        <label for="directEditSize">Text size</label><input type="number" id="directEditSize" min="8" max="120">
-        <button type="button" class="btn gold" id="directEditApply">Apply changes</button>
-        <small>Changes are saved when you select “Save to Supabase”.</small>
+        <div id="genericWebsiteFields">
+          <label for="directEditText">Text / label</label><textarea id="directEditText" rows="3"></textarea>
+          <div class="direct-edit-grid"><div><label for="directEditBg">Background</label><input type="color" id="directEditBg"></div><div><label for="directEditColor">Text colour</label><input type="color" id="directEditColor"></div></div>
+          <label for="directEditSize">Text size</label><input type="number" id="directEditSize" min="8" max="120">
+          <button type="button" class="btn gold" id="directEditApply">Apply changes</button>
+          <small id="directEditSaveHint">Changes are saved when you select “Save to Supabase”.</small>
+        </div>
+        <div id="projectCardEditor" style="display:none;border-top:1px solid #e8deeb;margin-top:14px;padding-top:12px">
+          <strong style="font-size:12px">✦ Edit project card</strong>
+          <label for="projectCardTitle">Project title</label><input id="projectCardTitle" type="text" maxlength="100">
+          <label for="projectCardDescription">Description</label><textarea id="projectCardDescription" rows="4" maxlength="1200"></textarea>
+          <label for="projectCardImageInput">Card image</label><input id="projectCardImageInput" type="file" accept="image/*">
+          <div class="mini-actions"><button type="button" id="removeProjectCardImage">Remove image</button></div>
+          <div class="direct-edit-grid"><div><label for="projectCardWidth">Card width (px)</label><input id="projectCardWidth" type="number" min="220" max="1000" step="10"></div><div><label for="projectCardX">Horizontal offset</label><input id="projectCardX" type="number" min="-500" max="500" step="5"></div></div>
+          <label for="projectCardY">Vertical offset</label><input id="projectCardY" type="number" min="-500" max="500" step="5">
+          <button type="button" class="btn gold" id="applyProjectCard" style="width:100%;margin-top:12px">Apply card changes</button>
+          <small>Images are resized and compressed before being saved with your portfolio content.</small>
+        </div>
       </div>
       <div class="contextual-tools">
         <h3>Selected element</h3>
@@ -288,7 +304,7 @@ footer{text-align:center;padding:38px 20px;color:var(--muted)}
         <h3 style="margin-top:18px">Page details</h3>
         <label for="pageTitle">Page heading</label><input id="pageTitle" placeholder="Page title">
         <label for="pageSubtitle">Small introduction</label><textarea id="pageSubtitle" rows="2" placeholder="Short introduction"></textarea>
-        <p class="canvas-help">The canvas is your free-design area. Page heading and introduction are also used in the published page navigation and accessibility labels.</p>
+        <p class="canvas-help">Page heading and introduction are also used in the published page navigation and accessibility labels.</p>
       </div>
     </aside>
   </div>
@@ -347,7 +363,11 @@ function defaultData(){
     {type:"textbox",text:"Let's connect.",left:100,top:120,width:850,fontSize:60,fontFamily:"Georgia",fontWeight:"bold",fill:"#393044"},
     {type:"textbox",text:"Interested in a project or want to get in touch? I'd be happy to hear from you.",left:105,top:230,width:850,fontSize:28,fontFamily:"Arial",fill:"#766d7e"}
   ];
-  return {version:2,theme:"light",pages,extraPages:[],contactEmail:"your-email@example.com",footer:"Designed with curiosity · Heli Patel"};
+  return {version:2,theme:"light",pages,projectCards:[
+    {id:"project-1",title:"Smart T.R.A.C.S.",description:"Add a description of your project, including the ideas, process and results.",image:""},
+    {id:"project-2",title:"Project Two",description:"Add a description of your project, including the ideas, process and results.",image:""},
+    {id:"project-3",title:"Project Three",description:"Add a description of your project, including the ideas, process and results.",image:""}
+  ],extraPages:[],contactEmail:"your-email@example.com",footer:"Designed with curiosity · Heli Patel"};
 }
 function toast(message){$("toast").textContent=message;$("toast").style.display="block";clearTimeout(toast.timer);toast.timer=setTimeout(()=>$("toast").style.display="none",3300)}
 function status(message){$("editorStatus").textContent=message}
@@ -401,13 +421,7 @@ function renderPublicSite(){
     if(key==="about")$("aboutText").textContent=texts.slice(1).join("\n\n")||"";
     if(key==="projects"){
       $("projectsIntro").textContent="Explore selected projects, experiments and ideas.";
-      $("projectGrid").innerHTML="";
-      (p.objects||[]).filter(o=>o.type==="textbox").slice(1).forEach(o=>{
-        const card=document.createElement("article");card.className="project-card";
-        const h=document.createElement("h3");h.textContent=o.text.split("\n")[0];card.appendChild(h);
-        const para=document.createElement("p");para.textContent=o.text.includes("\n")?o.text.split("\n").slice(1).join("\n"):"";card.appendChild(para);
-        $("projectGrid").appendChild(card);
-      });
+      renderProjectCards();
     }
     if(key==="contact")$("contactText").textContent=texts.slice(1).join("\n\n")||"";
   });
@@ -415,7 +429,7 @@ function renderPublicSite(){
   $("contactEmail").href="mailto:"+(siteData.contactEmail||"your-email@example.com");
   $("footerText").textContent=siteData.footer||"Designed with curiosity · Heli Patel";
   applyVisualEdits();
-  if(isAdmin)setupDirectSelection();
+  if(isAdmin){setupDirectSelection();setupProjectCardSelection();}
   // If a user has designed a page in the editor, show the saved design as a canvas preview below its standard section.
   document.querySelectorAll(".custom-page-preview").forEach(e=>e.remove());
   ["about","projects","contact"].forEach(key=>{
@@ -426,6 +440,98 @@ function renderPublicSite(){
     renderPageToCanvas(p,c,false).then(sc=>{sc.dispose();if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){(p.objects||[]).forEach((o,i)=>{if(o.animate){const el=c.parentElement;el.animate([{transform:"translateY(0)"},{transform:"translateY(-5px)"},{transform:"translateY(0)"}],{duration:2600+i*150,iterations:Infinity});}});}});
   });
 }
+let selectedProjectCardIndex = -1;
+let projectCardDrag = null;
+function ensureProjectCards(){
+  const defaults=defaultData().projectCards;
+  if(!Array.isArray(siteData.projectCards)||siteData.projectCards.length===0)siteData.projectCards=defaults;
+  siteData.projectCards=siteData.projectCards.slice(0,3);
+  while(siteData.projectCards.length<3)siteData.projectCards.push({...defaults[siteData.projectCards.length]});
+  siteData.projectCards=siteData.projectCards.map((card,i)=>({id:card?.id||`project-${i+1}`,title:card?.title||defaults[i].title,description:card?.description??defaults[i].description,image:card?.image||""}));
+}
+function renderProjectCards(){
+  ensureProjectCards();
+  const grid=$("projectGrid");if(!grid)return;
+  grid.innerHTML="";
+  siteData.projectCards.forEach((data,index)=>{
+    const card=document.createElement("article");card.className="project-card";card.dataset.projectIndex=String(index);
+    const layout=siteData.visualEdits?.projectCards?.[String(index)]||{};
+    if(layout.width)card.style.width=Math.max(220,Math.min(1000,Number(layout.width)))+"px";
+    if(layout.x||layout.y)card.style.transform=`translate(${Number(layout.x)||0}px,${Number(layout.y)||0}px)`;
+    const h=document.createElement("h3");h.textContent=data.title;card.appendChild(h);
+    const para=document.createElement("p");para.textContent=data.description;card.appendChild(para);
+    if(data.image){const img=document.createElement("img");img.className="project-card-image";img.src=data.image;img.alt=data.title;img.loading="lazy";card.appendChild(img);}
+    const handle=document.createElement("span");handle.className="project-card-resize";handle.setAttribute("aria-hidden","true");card.appendChild(handle);
+    grid.appendChild(card);
+  });
+  if(isAdmin)setupProjectCardSelection();
+}
+function openProjectCardEditor(index,el){
+  if(!isAdmin)return;
+  selectedProjectCardIndex=index;
+  if(directSelected)directSelected.classList.remove("admin-selected");
+  document.querySelectorAll(".project-card.admin-selected").forEach(n=>n.classList.remove("admin-selected"));
+  el.classList.add("admin-selected");directSelected=el;directSelectedKey="projectCards."+index;
+  $("editor").querySelector(".editor-layout")?.classList.add("has-selection");
+  const card=siteData.projectCards[index],layout=siteData.visualEdits?.projectCards?.[String(index)]||{};
+  $("directEditHint").textContent="Selected project card "+(index+1)+" — edit its content and image below.";
+  $("genericWebsiteFields").style.display="none";
+  $("projectCardEditor").style.display="block";
+  $("projectCardTitle").value=card.title;
+  $("projectCardDescription").value=card.description;
+  $("projectCardWidth").value=layout.width||Math.round(el.getBoundingClientRect().width);
+  $("projectCardX").value=layout.x||0;$("projectCardY").value=layout.y||0;
+  $("directEditPanel").classList.add("open");
+}
+function setupProjectCardSelection(){
+  document.querySelectorAll(".project-card").forEach(card=>{
+    const index=Number(card.dataset.projectIndex);
+    card.classList.add("admin-selectable");
+    if(card.dataset.projectBound==="yes")return;
+    card.dataset.projectBound="yes";
+    card.addEventListener("click",e=>{if(!isAdmin)return;e.preventDefault();e.stopPropagation();openProjectCardEditor(Number(card.dataset.projectIndex),card);});
+    card.addEventListener("pointerdown",e=>{
+      if(!isAdmin||e.target.classList.contains("project-card-resize"))return;
+      openProjectCardEditor(index,card);
+      if(e.target.closest("button,input,textarea"))return;
+      const startX=e.clientX,startY=e.clientY;const layout=siteData.visualEdits?.projectCards?.[String(index)]||{};
+      projectCardDrag={card,index,startX,startY,baseX:Number(layout.x)||0,baseY:Number(layout.y)||0,moved:false};
+      card.setPointerCapture?.(e.pointerId);
+    });
+    card.addEventListener("pointermove",e=>{
+      if(!projectCardDrag||projectCardDrag.card!==card)return;
+      const dx=e.clientX-projectCardDrag.startX,dy=e.clientY-projectCardDrag.startY;
+      if(Math.abs(dx)+Math.abs(dy)>4)projectCardDrag.moved=true;
+      if(projectCardDrag.moved){const x=projectCardDrag.baseX+dx,y=projectCardDrag.baseY+dy;card.style.transform=`translate(${x}px,${y}px)`;siteData.visualEdits=siteData.visualEdits||{};siteData.visualEdits.projectCards=siteData.visualEdits.projectCards||{};siteData.visualEdits.projectCards[String(index)]={...(siteData.visualEdits.projectCards[String(index)]||{}),x,y};$("projectCardX").value=Math.round(x);$("projectCardY").value=Math.round(y);}
+    });
+    const end=()=>{if(projectCardDrag?.card===card){if(projectCardDrag.moved){status("Card position updated. Save to Supabase to keep it.");}projectCardDrag=null;}};
+    card.addEventListener("pointerup",end);card.addEventListener("pointercancel",end);
+    const handle=card.querySelector(".project-card-resize");
+    handle?.addEventListener("pointerdown",e=>{if(!isAdmin)return;e.preventDefault();e.stopPropagation();openProjectCardEditor(Number(card.dataset.projectIndex),card);const start=e.clientX,startWidth=card.getBoundingClientRect().width;const move=ev=>{const width=Math.max(220,Math.min(1000,startWidth+ev.clientX-start));card.style.width=width+"px";$("projectCardWidth").value=Math.round(width);siteData.visualEdits=siteData.visualEdits||{};siteData.visualEdits.projectCards=siteData.visualEdits.projectCards||{};siteData.visualEdits.projectCards[String(index)]={...(siteData.visualEdits.projectCards[String(index)]||{}),width};};const stop=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",stop);status("Card width updated. Save to Supabase to keep it.");};window.addEventListener("pointermove",move);window.addEventListener("pointerup",stop,{once:true});});
+  });
+}
+function compressProjectImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();reader.onerror=()=>reject(new Error("Could not read that image."));
+    reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error("That image could not be opened."));img.onload=()=>{
+      const scale=Math.min(1,1200/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
+      const ctx=c.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);
+      let quality=.78,data=c.toDataURL("image/jpeg",quality);
+      while(data.length>650000&&quality>.42){quality-=.07;data=c.toDataURL("image/jpeg",quality);}
+      if(data.length>850000){reject(new Error("This image is still too large after compression. Please choose a smaller image."));return;}resolve(data);
+    };img.src=reader.result;};reader.readAsDataURL(file);
+  });
+}
+function applyProjectCardChanges(){
+  if(selectedProjectCardIndex<0)return;
+  const i=selectedProjectCardIndex;siteData.projectCards[i].title=$("projectCardTitle").value.trim()||`Project ${i+1}`;siteData.projectCards[i].description=$("projectCardDescription").value.trim();
+  siteData.visualEdits=siteData.visualEdits||{};siteData.visualEdits.projectCards=siteData.visualEdits.projectCards||{};
+  siteData.visualEdits.projectCards[String(i)]={...(siteData.visualEdits.projectCards[String(i)]||{}),width:Math.max(220,Math.min(1000,Number($("projectCardWidth").value)||300)),x:Number($("projectCardX").value)||0,y:Number($("projectCardY").value)||0};
+  const file=$("projectCardImageInput").files?.[0];
+  const finish=()=>{renderProjectCards();const card=document.querySelector(`.project-card[data-project-index="${i}"]`);if(card)openProjectCardEditor(i,card);status("Project card updated. Select Save to Supabase to keep your changes.");toast("Project card updated — remember to save to Supabase.");};
+  if(file){compressProjectImage(file).then(data=>{siteData.projectCards[i].image=data;$("projectCardImageInput").value="";finish();}).catch(err=>toast(err.message));}else finish();
+}
+
 function editableElements(){
   const selectors=[
     ["home.heroTitle","#heroTitle"],["home.heroEyebrow","#heroEyebrow"],["home.heroIntro","#heroIntro"],
@@ -446,11 +552,13 @@ function applyVisualEdits(){
     if(v.fontSize)el.style.fontSize=v.fontSize+"px";
   });
 }
-function closeDirectEditor(){if(directSelected)directSelected.classList.remove("admin-selected");directSelected=null;directSelectedKey="";$("directEditPanel").classList.remove("open");$("editor").querySelector(".editor-layout")?.classList.remove("has-selection");}
+function closeDirectEditor(){if(directSelected)directSelected.classList.remove("admin-selected");directSelected=null;directSelectedKey="";selectedProjectCardIndex=-1;$("genericWebsiteFields").style.display="block";$("projectCardEditor").style.display="none";$("directEditPanel").classList.remove("open");$("editor").querySelector(".editor-layout")?.classList.remove("has-selection");}
 function openDirectEditor(item){
   if(!isAdmin)return;
   if(directSelected)directSelected.classList.remove("admin-selected");
   directSelected=item.el;directSelectedKey=item.key;directSelected.classList.add("admin-selected");$("editor").querySelector(".editor-layout")?.classList.add("has-selection");
+  selectedProjectCardIndex=-1;
+  $("genericWebsiteFields").style.display="block";$("projectCardEditor").style.display="none";
   const key=item.key,el=item.el,edit=(siteData.visualEdits||{})[key]||{};
   const textNode=key.startsWith("home.tile")?el.querySelector("strong"):el;
   $("directEditText").value=edit.text!==undefined?edit.text:(textNode?.textContent||"").trim();
@@ -573,7 +681,7 @@ function openEditor(){
   moveWebsiteIntoWorkspace();
   setWorkspaceTab("preview");
   initialiseCanvas();
-  setupDirectSelection();
+  setupDirectSelection();setupProjectCardSelection();
 }
 function closeEditor(){
   saveCanvasToPage();
@@ -585,11 +693,12 @@ function closeEditor(){
   renderPublicSite();
   window.scrollTo({top:0,behavior:"smooth"});
 }
-function setEditorEnabled(enabled){isAdmin=enabled;$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){closeDirectEditor();restoreWebsiteToPage();$("editor").style.display="none";editorOpen=false;document.querySelectorAll(".admin-selectable").forEach(el=>el.classList.remove("admin-selectable","admin-selected"));}else{setupDirectSelection();}}
+function setEditorEnabled(enabled){isAdmin=enabled;document.body.classList.toggle("admin-editing",!!enabled);$("adminBar").style.display=enabled?"flex":"none";$("loginButton").style.display=enabled?"none":"inline-block";if(!enabled){closeDirectEditor();restoreWebsiteToPage();$("editor").style.display="none";editorOpen=false;document.querySelectorAll(".admin-selectable").forEach(el=>el.classList.remove("admin-selectable","admin-selected"));}else{setupDirectSelection();setupProjectCardSelection();}}
 async function loadContent(){
   const {data,error}=await db.from("site_content").select("content").eq("id",PORTFOLIO_RECORD_ID).maybeSingle();
   if(error){console.warn(error);toast("Could not load Supabase content. Showing the starter portfolio.");return;}
-  if(data&&data.content){const incoming=data.content;if(incoming.pages)siteData={...defaultData(),...incoming};else if(incoming.elements||incoming.pageSettings){siteData=defaultData();} }
+  if(data&&data.content){const incoming=data.content;const defaults=defaultData();if(incoming.pages)siteData={...defaults,...incoming,pages:{...defaults.pages,...incoming.pages}};else if(incoming.elements||incoming.pageSettings){siteData=defaults;} }
+  ensureProjectCards();
   renderPublicSite();
 }
 async function saveContent(){
@@ -678,6 +787,9 @@ $("loginModal").onclick=e=>{if(e.target===$("loginModal"))$("loginModal").style.
 $("logoutButton").onclick=async()=>{await db.auth.signOut();setEditorEnabled(false);toast("You have been logged out.");};
 $("directEditClose").onclick=closeDirectEditor;
 $("directEditApply").onclick=applyDirectEdit;
+$("applyProjectCard").onclick=applyProjectCardChanges;
+$("removeProjectCardImage").onclick=()=>{if(selectedProjectCardIndex<0)return;siteData.projectCards[selectedProjectCardIndex].image="";$("projectCardImageInput").value="";applyProjectCardChanges();};
+$("projectCardImageInput").onchange=()=>{if(!$("projectCardImageInput").files?.[0])return;applyProjectCardChanges();};
 $("loginForm").onsubmit=async e=>{
   e.preventDefault();$("loginMessage").textContent="Signing in…";
   const {data,error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
@@ -689,296 +801,250 @@ db.auth.onAuthStateChange((_event,session)=>{const user=session?.user;setEditorE
 window.addEventListener("beforeunload",e=>{if(editorOpen){e.preventDefault();e.returnValue="You may have unsaved portfolio changes.";}});
 
 (async()=>{await loadContent();await checkSession();})();
-  
-let selectedWebsiteTile = null;
-let websiteTilePointer = null;
+/* ---------- LIVE WEBSITE EDITOR (replaces the separate design canvas) ---------- */
+const liveEditorDefaults = () => ({home:[],about:[],projects:[],contact:[]});
+siteData.liveElements = siteData.liveElements || liveEditorDefaults();
+let selectedLiveId = null;
+let liveClipboard = null;
+let liveUndoStack = [];
+let liveUndoIndex = -1;
+let livePointerDrag = null;
 
-// Add the new transfer buttons without replacing existing controls.
-(function addTransferControls() {
-  const panel = document.getElementById("directEditPanel");
-  if (!panel || document.getElementById("copyWebsiteTileToCanvas")) return;
+const liveStyle = document.createElement('style');
+liveStyle.textContent = `
+  #canvasWorkspace,.workspace-tabs{display:none!important}
+  #sitePreviewMount{display:block!important;flex:1;min-height:0;overflow:auto}
+  .editor-layout{grid-template-columns:245px minmax(360px,1fr) 285px!important}
+  .live-elements-layer{position:relative;min-height:0;width:100%;max-width:1120px;margin:12px auto 0;overflow:visible;}
+  .live-element{position:absolute;box-sizing:border-box;user-select:none;touch-action:none;cursor:move;overflow-wrap:anywhere;}
+  .live-element.live-selected{outline:2px dashed #c5a15b;outline-offset:3px;z-index:50!important;}
+  .live-element .live-resize{display:none;position:absolute;right:-7px;bottom:-7px;width:16px;height:16px;border:2px solid #fff;border-radius:4px;background:#c5a15b;cursor:nwse-resize;z-index:60;}
+  body.admin-editing .live-element.live-selected .live-resize{display:block}
+  .live-element.live-locked{cursor:not-allowed;}
+  .live-element img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;pointer-events:none}
+  .live-layer-note{font-size:10px;color:#8b7d91;padding:6px 0 0;}
+  @keyframes liveFloat{0%,100%{translate:0 0}50%{translate:0 -6px}}
+  #sitePreviewMount .custom-page-preview{display:none!important}
+  @media(max-width:1050px){.editor-layout{grid-template-columns:205px minmax(320px,1fr) 245px!important}}
+`;
+document.head.appendChild(liveStyle);
 
-  const tileButton = document.createElement("button");
-  tileButton.type = "button";
-  tileButton.id = "copyWebsiteTileToCanvas";
-  tileButton.className = "btn";
-  tileButton.textContent = "Copy website tile to design canvas";
-  tileButton.style.cssText = "width:100%;margin-top:9px";
-  tileButton.onclick = copyWebsiteTileToCanvas;
-
-  const canvasButton = document.createElement("button");
-  canvasButton.type = "button";
-  canvasButton.id = "copyCanvasObjectToWebsite";
-  canvasButton.className = "btn";
-  canvasButton.textContent = "Copy canvas object to website";
-  canvasButton.style.cssText = "width:100%;margin-top:8px";
-  canvasButton.onclick = copyCanvasObjectToWebsite;
-
-  panel.appendChild(tileButton);
-  panel.appendChild(canvasButton);
-})();
-
-// Make project tiles selectable and movable/resizable in Website Preview.
-function initialiseWebsiteTileEditing() {
-  if (!isAdmin || !editorOpen) return;
-
-  document.querySelectorAll("#projectGrid .project-card").forEach((card, index) => {
-    card.classList.add("website-editable-tile");
-
-    const saved = siteData.visualEdits?.projectCards?.[index];
-
-    if (saved) {
-      card.style.transform = `translate(${saved.x || 0}px, ${saved.y || 0}px)`;
-      if (saved.width) card.style.width = saved.width + "px";
-    }
-
-    if (card.dataset.websiteEditorReady === "yes") return;
-    card.dataset.websiteEditorReady = "yes";
-
-    card.addEventListener("click", event => {
-      if (!isAdmin || !editorOpen) return;
-      if (event.target.classList.contains("website-resize-handle")) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (selectedWebsiteTile) {
-        selectedWebsiteTile.classList.remove("website-tile-selected");
+function livePageList(){return Object.keys(siteData.pages||{});}
+function liveItems(page=currentPage){
+  siteData.liveElements=siteData.liveElements||liveEditorDefaults();
+  if(!Array.isArray(siteData.liveElements[page]))siteData.liveElements[page]=[];
+  return siteData.liveElements[page];
+}
+function liveSnapshot(){return JSON.stringify(liveItems());}
+function liveRecordHistory(){
+  const snap=liveSnapshot();
+  if(liveUndoIndex>=0&&liveUndoStack[liveUndoIndex]===snap)return;
+  liveUndoStack=liveUndoStack.slice(0,liveUndoIndex+1);liveUndoStack.push(snap);
+  if(liveUndoStack.length>60)liveUndoStack.shift();liveUndoIndex=liveUndoStack.length-1;
+  if($('undoButton'))$('undoButton').disabled=liveUndoIndex<=0;
+  if($('redoButton'))$('redoButton').disabled=liveUndoIndex>=liveUndoStack.length-1;
+}
+function liveRestoreHistory(next){
+  if(next<0||next>=liveUndoStack.length)return;
+  liveUndoIndex=next;siteData.liveElements[currentPage]=JSON.parse(liveUndoStack[next]);selectedLiveId=null;
+  renderLiveElements();refreshLiveLayers();clearLiveProperties();
+  $('undoButton').disabled=liveUndoIndex<=0;$('redoButton').disabled=liveUndoIndex>=liveUndoStack.length-1;
+}
+function liveSelected(){return liveItems().find(o=>o.id===selectedLiveId)||null;}
+function liveElementMarkup(o){
+  const el=document.createElement('div');el.className='live-element'+(o.locked?' live-locked':'');el.dataset.liveId=o.id;
+  el.style.left=(Number(o.x)||0)+'px';el.style.top=(Number(o.y)||0)+'px';
+  el.style.width=Math.max(30,Number(o.width)||240)+'px';el.style.height=Math.max(24,Number(o.height)|| (o.type==='text'?80:120))+'px';
+  el.style.opacity=o.opacity==null?1:o.opacity;el.style.transform=`rotate(${Number(o.angle)||0}deg)`;
+  el.style.zIndex=String(Number(o.z)||1);el.style.color=o.color||'#393044';el.style.background=o.background||'transparent';
+  el.style.border=o.border||'none';el.style.borderRadius=(Number(o.radius)||0)+'px';
+  el.style.fontFamily=o.fontFamily||'Arial';el.style.fontSize=(Number(o.fontSize)||26)+'px';el.style.fontWeight=o.bold?'700':'400';el.style.fontStyle=o.italic?'italic':'normal';el.style.textDecoration=o.underline?'underline':'none';el.style.textAlign=o.textAlign||'left';el.style.padding=(Number(o.padding)||0)+'px';
+  if(o.type==='text'||o.type==='project'){el.textContent=o.text||'';el.style.whiteSpace='pre-wrap';}
+  else if(o.type==='image'){const img=document.createElement('img');img.src=o.src||'';img.alt=o.alt||'Portfolio image';el.appendChild(img);}
+  else if(o.type==='rect'||o.type==='circle'){el.style.background=o.background||'#eee8f8';if(o.type==='circle')el.style.borderRadius='50%';}
+  else if(o.type==='line'){el.style.height=Math.max(2,Number(o.height)||4)+'px';el.style.background=o.color||'#c5a15b';el.style.transform=`rotate(${Number(o.angle)||0}deg)`;}
+  if(o.type==='project'){el.style.padding='18px';el.style.borderRadius='16px';el.style.boxShadow='0 8px 22px #34233d18';}
+  if(o.animate)el.style.animation='liveFloat 2.6s ease-in-out infinite';
+  const handle=document.createElement('span');handle.className='live-resize';el.appendChild(handle);
+  return el;
+}
+function liveLayerHost(page){
+  if(page==='home')return $('home');
+  const section=$(page);return section?.querySelector('.section-shell')||section;
+}
+function renderLiveElements(){
+  livePageList().forEach(page=>{
+    const host=liveLayerHost(page);if(!host)return;
+    const bg=siteData.pages?.[page]?.background;if(bg){if(page==='home')host.style.backgroundColor=bg;else host.style.backgroundColor=bg;}
+    host.querySelectorAll(':scope > .live-elements-layer').forEach(n=>n.remove());
+    const items=liveItems(page);if(!items.length)return;
+    const layer=document.createElement('div');layer.className='live-elements-layer';layer.dataset.livePage=page;
+    const maxBottom=Math.max(280,...items.map(o=>(Number(o.y)||0)+(Number(o.height)||100)+24));
+    layer.style.minHeight=maxBottom+'px';
+    items.forEach(o=>{
+      const el=liveElementMarkup(o);if(o.id===selectedLiveId&&page===currentPage)el.classList.add('live-selected');
+      layer.appendChild(el);
+    });
+    host.appendChild(layer);
+  });
+  if(isAdmin&&editorOpen){bindLiveElementEvents();refreshLiveLayers();}
+}
+function selectLiveElement(id){
+  selectedLiveId=id;
+  document.querySelectorAll('.live-element').forEach(el=>el.classList.toggle('live-selected',el.dataset.liveId===id));
+  const o=liveSelected();if(!o)return;
+  $('editor').querySelector('.editor-layout')?.classList.add('has-selection');
+  $('directEditPanel').classList.remove('open');
+  $('objectText').value=o.text||'';$('fontFamily').value=o.fontFamily||'Arial';$('fontSize').value=o.fontSize||26;$('textAlign').value=o.textAlign||'left';
+  $('fillColor').value=o.color||'#393044';$('strokeColor').value=o.borderColor||'#c5a15b';$('strokeWidth').value=o.strokeWidth||0;$('opacity').value=o.opacity??1;
+  $('objectX').value=Math.round(o.x||0);$('objectY').value=Math.round(o.y||0);$('objectWidth').value=Math.round(o.width||240);$('objectHeight').value=Math.round(o.height||100);$('objectAngle').value=Math.round(o.angle||0);
+  $('animateObject').checked=!!o.animate;$('lockToggle').checked=!!o.locked;
+  refreshLiveLayers();
+}
+function clearLiveProperties(){selectedLiveId=null;$('editor').querySelector('.editor-layout')?.classList.remove('has-selection');$('objectText').value='';}
+function refreshLiveLayers(){
+  const list=$('layerList');if(!list)return;list.innerHTML='';const items=liveItems();
+  if(!items.length){list.innerHTML='<span style="font-size:11px;color:#766b7e">No added elements on this page yet</span>';return;}
+  [...items].reverse().forEach(o=>{const b=document.createElement('button');b.className='layer-item'+(o.id===selectedLiveId?' selected':'');b.textContent=(o.locked?'🔒 ':'')+(o.text||o.type||'Element').split('\n')[0].slice(0,34);b.onclick=()=>selectLiveElement(o.id);list.appendChild(b);});
+}
+function bindLiveElementEvents(){
+  document.querySelectorAll('.live-element').forEach(el=>{
+    if(el.dataset.liveBound==='yes')return;el.dataset.liveBound='yes';
+    el.addEventListener('click',e=>{if(!isAdmin||!editorOpen)return;e.preventDefault();e.stopPropagation();selectLiveElement(el.dataset.liveId);});
+    el.addEventListener('pointerdown',e=>{
+      if(!isAdmin||!editorOpen)return;const o=liveItems(el.closest('.live-elements-layer').dataset.livePage).find(x=>x.id===el.dataset.liveId);if(!o||o.locked)return;
+      if(e.target.classList.contains('live-resize')){
+        e.preventDefault();e.stopPropagation();selectLiveElement(o.id);livePointerDrag={mode:'resize',id:o.id,startX:e.clientX,startY:e.clientY,width:Number(o.width)||240,height:Number(o.height)||100};
+      }else{
+        if(e.button!==0)return;e.preventDefault();e.stopPropagation();selectLiveElement(o.id);livePointerDrag={mode:'move',id:o.id,startX:e.clientX,startY:e.clientY,x:Number(o.x)||0,y:Number(o.y)||0};
       }
-
-      selectedWebsiteTile = card;
-      card.classList.add("website-tile-selected");
-      $("directEditHint").textContent =
-        "Selected website project tile " + (index + 1);
-      $("directEditText").value =
-        card.innerText.trim();
-
-      $("directEditPanel").classList.add("open");
-      $("editor").querySelector(".editor-layout").classList.add("has-selection");
-    });
-
-    // Drag the selected tile.
-    card.addEventListener("pointerdown", event => {
-      if (!isAdmin || !editorOpen) return;
-      if (event.target.classList.contains("website-resize-handle")) return;
-
-      if (event.target.closest("button,a")) return;
-
-      selectedWebsiteTile = card;
-
-      const current = siteData.visualEdits?.projectCards?.[index] || {};
-      const startX = event.clientX;
-      const startY = event.clientY;
-      const initialX = current.x || 0;
-      const initialY = current.y || 0;
-
-      websiteTilePointer = {
-        card, index, startX, startY, initialX, initialY
-      };
-
-      card.setPointerCapture(event.pointerId);
-    });
-
-    card.addEventListener("pointermove", event => {
-      if (!websiteTilePointer || websiteTilePointer.card !== card) return;
-
-      const dx = event.clientX - websiteTilePointer.startX;
-      const dy = event.clientY - websiteTilePointer.startY;
-      const x = websiteTilePointer.initialX + dx;
-      const y = websiteTilePointer.initialY + dy;
-
-      card.style.transform = `translate(${x}px, ${y}px)`;
-    });
-
-    card.addEventListener("pointerup", () => {
-      if (!websiteTilePointer || websiteTilePointer.card !== card) return;
-
-      const rect = card.getBoundingClientRect();
-      const parentRect = card.parentElement.getBoundingClientRect();
-      const transform = card.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
-
-      siteData.visualEdits = siteData.visualEdits || {};
-      siteData.visualEdits.projectCards = siteData.visualEdits.projectCards || {};
-
-      siteData.visualEdits.projectCards[index] = {
-        ...(siteData.visualEdits.projectCards[index] || {}),
-        x: transform ? Number(transform[1]) : 0,
-        y: transform ? Number(transform[2]) : 0,
-        width: card.offsetWidth
-      };
-
-      websiteTilePointer = null;
-      status("Website tile position updated. Save to Supabase to publish.");
-    });
-
-    // Add a resize handle.
-    const handle = document.createElement("span");
-    handle.className = "website-resize-handle";
-    handle.title = "Drag to resize";
-    card.appendChild(handle);
-
-    handle.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const startWidth = card.offsetWidth;
-      const startX = event.clientX;
-
-      handle.setPointerCapture(event.pointerId);
-
-      const move = e => {
-        const width = Math.max(150, startWidth + e.clientX - startX);
-        card.style.width = width + "px";
-      };
-
-      const finish = () => {
-        handle.removeEventListener("pointermove", move);
-        handle.removeEventListener("pointerup", finish);
-
-        siteData.visualEdits = siteData.visualEdits || {};
-        siteData.visualEdits.projectCards = siteData.visualEdits.projectCards || {};
-        siteData.visualEdits.projectCards[index] = {
-          ...(siteData.visualEdits.projectCards[index] || {}),
-          width: card.offsetWidth
-        };
-
-        status("Website tile size updated. Save to Supabase to publish.");
-      };
-
-      handle.addEventListener("pointermove", move);
-      handle.addEventListener("pointerup", finish);
+      el.setPointerCapture?.(e.pointerId);
     });
   });
 }
-
-// Styling for selection and resize handles.
-(function addWebsiteTileStyles() {
-  if (document.getElementById("websiteTileEditorStyles")) return;
-
-  const style = document.createElement("style");
-  style.id = "websiteTileEditorStyles";
-  style.textContent = `
-    .website-editable-tile {
-      position: relative;
-      cursor: grab !important;
-      touch-action: pan-y;
-    }
-    .website-editable-tile.website-tile-selected {
-      outline: 3px solid #c5a15b !important;
-      outline-offset: 4px;
-    }
-    .website-resize-handle {
-      display: none;
-      position: absolute;
-      right: 4px;
-      bottom: 4px;
-      width: 17px;
-      height: 17px;
-      border-radius: 4px;
-      background: #c5a15b;
-      border: 2px solid white;
-      cursor: nwse-resize;
-      touch-action: none;
-    }
-    body.admin-editing .website-resize-handle {
-      display: block;
-    }
-  `;
-  document.head.appendChild(style);
-})();
-
-// Copy a website project tile into the free canvas.
-// The original website tile is not removed or changed.
-function copyWebsiteTileToCanvas() {
-  if (!selectedWebsiteTile || !canvas) {
-    toast("Select a project tile in Website Preview first.");
-    return;
-  }
-
-  const title = selectedWebsiteTile.querySelector("h3")?.textContent || "Copied project";
-  const description = selectedWebsiteTile.querySelector("p")?.textContent || "";
-
-  const background = new fabric.Rect({
-    left: 90, top: 100, width: 430, height: 220,
-    fill: "#eee8f8", rx: 20, ry: 20
-  });
-
-  const text = new fabric.Textbox(
-    title + (description ? "\n" + description : ""),
-    {
-      left: 115, top: 125, width: 380,
-      fontSize: 25, fontFamily: "Arial",
-      fill: "#393044", splitByGrapheme: true
-    }
-  );
-
-  addObject(background);
-  addObject(text);
-
-  toast("Project tile copied to Free Design Canvas.");
-}
-
-// Copy the selected free-canvas object to the Projects page.
-// A separate JSON copy is stored, so the original stays independent.
-function copyCanvasObjectToWebsite() {
-  if (!canvas || !active()) {
-    toast("Select an object on Free Design Canvas first.");
-    return;
-  }
-
-  const copiedObject = JSON.parse(JSON.stringify(objectToJSON(active())));
-
-  siteData.pages.projects.objects =
-    siteData.pages.projects.objects || [];
-
-  // Give the copy a small offset so it is distinguishable.
-  copiedObject.left = (copiedObject.left || 0) + 25;
-  copiedObject.top = (copiedObject.top || 0) + 25;
-
-  siteData.pages.projects.objects.push(copiedObject);
-
-  renderPublicSite();
-
-  if (editorOpen) {
-    moveWebsiteIntoWorkspace();
-    setWorkspaceTab("preview");
-    initialiseWebsiteTileEditing();
-  }
-
-  status("A separate copy has been added to the Projects page. Save to Supabase to publish.");
-  toast("Canvas object copied to the website.");
-}
-
-// Watch for project tiles being regenerated by the existing website renderer.
-const websiteTileObserver = new MutationObserver(() => {
-  if (isAdmin && editorOpen) initialiseWebsiteTileEditing();
+window.addEventListener('pointermove',e=>{
+  if(!livePointerDrag)return;const o=liveItems().find(x=>x.id===livePointerDrag.id);if(!o)return;
+  const dx=e.clientX-livePointerDrag.startX,dy=e.clientY-livePointerDrag.startY;
+  if(livePointerDrag.mode==='move'){o.x=Math.round(livePointerDrag.x+dx);o.y=Math.round(livePointerDrag.y+dy);}
+  else{o.width=Math.max(30,Math.round(livePointerDrag.width+dx));o.height=Math.max(24,Math.round(livePointerDrag.height+dy));}
+  const el=document.querySelector(`.live-element[data-live-id="${o.id}"]`);if(el){el.style.left=o.x+'px';el.style.top=o.y+'px';el.style.width=o.width+'px';el.style.height=o.height+'px';}
+  $('objectX').value=o.x;$('objectY').value=o.y;$('objectWidth').value=o.width;$('objectHeight').value=o.height;
 });
+window.addEventListener('pointerup',()=>{if(livePointerDrag){livePointerDrag=null;liveRecordHistory();status('Element updated on the live website. Save to Supabase to keep it.');}});
+function addLiveElement(type,values={}){
+  const defaults={text:type==='heading'?'Your heading':type==='project'?'Project title\nAdd your project description here.':type==='text'?'Write something here...':'',x:35,y:35,width:type==='heading'?480:300,height:type==='heading'?80:130,fontSize:type==='heading'?42:24,fontFamily:'Arial',color:'#393044',background:type==='rect'?'#eee8f8':type==='circle'?'#f4dce9':'transparent',opacity:1,angle:0,padding:type==='project'?18:0,radius:type==='project'?16:0,bold:type==='heading',type:type==='heading'?'text':type};
+  const obj={...defaults,...values,id:'live-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)};
+  if(type==='heading')obj.type='text';liveItems().push(obj);selectedLiveId=obj.id;renderLiveElements();selectLiveElement(obj.id);liveRecordHistory();status('Added directly to the live website.');
+}
+function liveUpdate(fn){const o=liveSelected();if(!o)return;fn(o);renderLiveElements();selectLiveElement(o.id);liveRecordHistory();status('Live website updated. Save to Supabase to keep it.');}
+function liveDelete(){const o=liveSelected();if(!o)return;siteData.liveElements[currentPage]=liveItems().filter(x=>x.id!==o.id);selectedLiveId=null;renderLiveElements();clearLiveProperties();liveRecordHistory();}
+function liveDuplicate(){const o=liveSelected();if(!o)return;const clone={...o,id:'live-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),x:(o.x||0)+24,y:(o.y||0)+24};liveItems().push(clone);selectedLiveId=clone.id;renderLiveElements();selectLiveElement(clone.id);liveRecordHistory();}
+function liveMoveZ(delta){const o=liveSelected();if(!o)return;const arr=liveItems(),i=arr.indexOf(o),j=Math.max(0,Math.min(arr.length-1,i+delta));arr.splice(i,1);arr.splice(j,0,o);renderLiveElements();selectLiveElement(o.id);liveRecordHistory();}
+function liveApplyProperty(id,value,property){liveUpdate(o=>{o[property]=value;});}
 
-websiteTileObserver.observe(document.getElementById("projectGrid"), {
-  childList: true,
-  subtree: true
-});
+// The website preview is now the only workspace. The old Fabric canvas is no longer opened or displayed.
 
-// Keep the existing editor's open process intact and initialise the new tools.
-const originalOpenEditorForWebsiteTiles = openEditor;
+const previousOpenDirectEditor = openDirectEditor;
+openDirectEditor = function(item){previousOpenDirectEditor(item);$('editor').querySelector('.editor-layout')?.classList.remove('has-selection');};
+const previousOpenProjectCardEditor = openProjectCardEditor;
+openProjectCardEditor = function(index,el){previousOpenProjectCardEditor(index,el);$('editor').querySelector('.editor-layout')?.classList.remove('has-selection');};
 
-openEditor = function() {
-  originalOpenEditorForWebsiteTiles();
-  document.body.classList.add("admin-editing");
-  initialiseWebsiteTileEditing();
+const previousRenderPublicSite = renderPublicSite;
+renderPublicSite = function(){
+  previousRenderPublicSite();
+  document.querySelectorAll('.custom-page-preview').forEach(n=>n.remove());
+  renderLiveElements();
+};
+moveWebsiteIntoWorkspace = function(){
+  const mount=$('sitePreviewMount');if(!mount||parkedSiteNodes)return;
+  parkedSiteNodes=[document.querySelector('.site-header'),document.querySelector('main'),document.querySelector('footer')].filter(Boolean);
+  parkedSiteNodes.forEach(node=>mount.appendChild(node));
+  setupDirectSelection();setupProjectCardSelection();renderLiveElements();
+};
+setWorkspaceTab = function(){ $('sitePreviewMount').style.display='block';$('canvasWorkspace').classList.remove('active'); };
+openEditor = function(){
+  editorOpen=true;$('editor').style.display='block';$('adminBar').style.display='none';
+  moveWebsiteIntoWorkspace();setWorkspaceTab('preview');
+  liveUndoStack=[];liveUndoIndex=-1;liveRecordHistory();
+  setupDirectSelection();setupProjectCardSelection();renderLiveElements();
+  $('editor').querySelector('.editor-layout').classList.remove('has-selection');
+};
+closeEditor = function(){
+  closeDirectEditor();selectedLiveId=null;restoreWebsiteToPage();$('editor').style.display='none';editorOpen=false;$('adminBar').style.display=isAdmin?'flex':'none';renderPublicSite();window.scrollTo({top:0,behavior:'smooth'});
+};
+saveContent = async function(){
+  if(!isAdmin){toast('Please sign in as the portfolio administrator.');return;}
+  const {data,error}=await db.from('site_content').update({content:siteData,updated_at:new Date().toISOString()}).eq('id',PORTFOLIO_RECORD_ID).select('id').maybeSingle();
+  if(error){console.error(error);status('Save failed: '+error.message);toast('Save failed. Check the Supabase row and table permissions.');return;}
+  if(!data){status('No row with ID 2 was updated.');toast('Supabase row ID 2 was not found.');return;}
+  status('Saved successfully to Supabase at '+new Date().toLocaleTimeString()+'.');toast('Your live website changes have been saved.');renderPublicSite();
+};
+switchPage = function(name){
+  if(!siteData.pages[name])return;currentPage=name;selectedLiveId=null;liveUndoStack=[];liveUndoIndex=-1;liveRecordHistory();
+  document.querySelectorAll('.page-tab[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  $('pageTitle').value=siteData.pages[name].title||'';$('pageSubtitle').value=siteData.pages[name].subtitle||'';$('pageBackground').value=siteData.pages[name].background||'#fffaf5';
+  renderLiveElements();refreshLiveLayers();clearLiveProperties();status('Editing '+name+' directly on the website.');
 };
 
-// Keep the existing close process intact.
-const originalCloseEditorForWebsiteTiles = closeEditor;
-
-closeEditor = function() {
-  document.body.classList.remove("admin-editing");
-  if (selectedWebsiteTile) {
-    selectedWebsiteTile.classList.remove("website-tile-selected");
-    selectedWebsiteTile = null;
-  }
-  originalCloseEditorForWebsiteTiles();
+// Add-element buttons create real HTML elements over the selected website page.
+$('addHeading').onclick=()=>addLiveElement('heading');
+$('addText').onclick=()=>addLiveElement('text');
+$('addRect').onclick=()=>addLiveElement('rect');
+$('addCircle').onclick=()=>addLiveElement('circle');
+$('addLine').onclick=()=>addLiveElement('line',{width:220,height:5,background:'#c5a15b',color:'#c5a15b'});
+$('addProject').onclick=()=>addLiveElement('project',{width:340,height:190,background:'#eee8f8',text:'Project title\nAdd your project description here.'});
+$('addImage').onclick=()=>$('imageInput').click();
+$('imageInput').onchange=async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{const src=await compressProjectImage(file);addLiveElement('image',{src,width:320,height:220,alt:file.name});}catch(err){toast(err.message||'Could not add this image.');}
+  e.target.value='';
 };
+$('undoButton').onclick=()=>liveRestoreHistory(liveUndoIndex-1);
+$('redoButton').onclick=()=>liveRestoreHistory(liveUndoIndex+1);
+$('bringFront').onclick=()=>liveMoveZ(1);
+$('sendBack').onclick=()=>liveMoveZ(-1);
+$('moveUp').onclick=()=>liveMoveZ(1);
+$('moveDown').onclick=()=>liveMoveZ(-1);
+$('deleteObject').onclick=liveDelete;
+$('duplicateObject').onclick=liveDuplicate;
+$('copyObject').onclick=()=>{const o=liveSelected();if(o){liveClipboard={...o};toast('Element copied. Select Paste to add it.');}};
+$('pasteObject').onclick=()=>{if(liveClipboard){const clone={...liveClipboard,id:'live-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),x:(liveClipboard.x||0)+25,y:(liveClipboard.y||0)+25};liveItems().push(clone);selectedLiveId=clone.id;renderLiveElements();selectLiveElement(clone.id);liveRecordHistory();}};
+$('lockObject').onclick=()=>liveUpdate(o=>o.locked=!o.locked);
+$('lockToggle').onchange=e=>liveUpdate(o=>o.locked=e.target.checked);
+$('objectText').oninput=e=>{const o=liveSelected();if(o){o.text=e.target.value;const el=document.querySelector(`.live-element[data-live-id="${o.id}"]`);if(el&&el.firstChild?.nodeType===3)el.firstChild.textContent=o.text;}};
+$('objectText').onchange=()=>liveRecordHistory();
+$('fontFamily').onchange=e=>liveUpdate(o=>o.fontFamily=e.target.value);
+$('fontSize').onchange=e=>liveUpdate(o=>o.fontSize=Number(e.target.value));
+$('textAlign').onchange=e=>liveUpdate(o=>o.textAlign=e.target.value);
+$('fillColor').oninput=e=>liveUpdate(o=>{if(o.type==='line')o.color=e.target.value;else if(o.type==='rect'||o.type==='circle'||o.type==='project')o.background=e.target.value;else o.color=e.target.value;});
+$('strokeColor').oninput=e=>liveUpdate(o=>{o.borderColor=e.target.value;o.border=`${Number(o.strokeWidth)||1}px solid ${e.target.value}`;});
+$('strokeWidth').onchange=e=>liveUpdate(o=>{o.strokeWidth=Number(e.target.value);o.border=`${o.strokeWidth}px solid ${o.borderColor||'#c5a15b'}`;});
+$('opacity').oninput=e=>liveUpdate(o=>o.opacity=Number(e.target.value));
+$('objectX').onchange=e=>liveUpdate(o=>o.x=Number(e.target.value));
+$('objectY').onchange=e=>liveUpdate(o=>o.y=Number(e.target.value));
+$('objectWidth').onchange=e=>liveUpdate(o=>o.width=Math.max(30,Number(e.target.value)));
+$('objectHeight').onchange=e=>liveUpdate(o=>o.height=Math.max(24,Number(e.target.value)));
+$('objectAngle').onchange=e=>liveUpdate(o=>o.angle=Number(e.target.value));
+$('boldText').onclick=()=>liveUpdate(o=>o.bold=!o.bold);
+$('italicText').onclick=()=>liveUpdate(o=>o.italic=!o.italic);
+$('underlineText').onclick=()=>liveUpdate(o=>o.underline=!o.underline);
+$('animateObject').onchange=e=>liveUpdate(o=>o.animate=e.target.checked);
+$('pageBackground').oninput=e=>{
+  const p=siteData.pages[currentPage];p.background=e.target.value;
+  const host=liveLayerHost(currentPage);if(currentPage==='home')host.style.backgroundColor=e.target.value;else if(host)host.style.backgroundColor=e.target.value;
+  if(currentPage==='home')$('home').style.backgroundColor=e.target.value;
+  status('Page background updated. Save to Supabase to keep it.');
+};
+$('pageTitle').onchange=e=>{siteData.pages[currentPage].title=e.target.value;const el=$(currentPage+'Title');if(el)el.textContent=e.target.value;};
+$('pageSubtitle').onchange=e=>{siteData.pages[currentPage].subtitle=e.target.value;const el=$(currentPage==='home'?'heroEyebrow':currentPage+'Eyebrow');if(el)el.textContent=e.target.value;};
+$('resetPageButton').onclick=()=>{if(confirm('Remove all added live elements from this page?')){siteData.liveElements[currentPage]=[];selectedLiveId=null;renderLiveElements();refreshLiveLayers();clearLiveProperties();liveRecordHistory();}};
+$('previewButton').onclick=()=>{renderPublicSite();closeEditor();$('publicSite').scrollIntoView({behavior:'smooth'});};
+$('saveButton').onclick=saveContent;
+// Remove references to the old separate canvas from visible labels and guidance.
+document.querySelectorAll('.canvas-help').forEach(el=>{if(/canvas/i.test(el.textContent))el.textContent='Select an item on the live website to move, resize, rotate or edit it. Changes are saved with Save to Supabase.';});
+const editorHeading=document.querySelector('.editor-top strong');if(editorHeading)editorHeading.textContent='✦ Live website editor';
+const liveHint=document.querySelector('.editor-middle > span');if(liveHint)liveHint.textContent='Select an item on the website to edit it';
+
 </script>
 </body>
 </html>
